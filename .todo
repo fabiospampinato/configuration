@@ -1,0 +1,5 @@
+
+☐ somehow preserve comments in `dataRaw` when editing `data` via the APIs
+  ☐ edit `dataRaw` directly when possible
+☐ support ajv-pack and remove (?) AJV dependency
+☐ add support for extending without providing a namespace
