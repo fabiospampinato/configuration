@@ -35,38 +35,42 @@ benchmark.defaultOptions = Object.assign ( benchmark.defaultOptions, {
   }
 });
 
-benchmark ({
-  name: 'constructor:basic',
-  iterations: 1,
-  fn: () => {
-    new Configuration ({
-      providers: [
-        new ProviderMemory ({ scope: 'foo' })
-      ]
-    });
-  }
-});
+benchmark.group ( 'constructor', () => {
 
-benchmark ({
-  name: 'constructor:advanced',
-  iterations: 1,
-  fn: () => {
-    new Configuration ({
-      providers: [
-        new ProviderMemory ({ scope: 'foo' })
-      ],
-      defaults: Fixtures.defaults,
-      schema: Fixtures.schema
-    });
-  }
-});
+  benchmark ({
+    name: 'basic',
+    iterations: 1,
+    fn: () => {
+      new Configuration ({
+        providers: [
+          new ProviderMemory ({ scope: 'foo' })
+        ]
+      });
+    }
+  });
 
-benchmark ({
-  name: 'constructor:json',
-  iterations: 1,
-  fn: ctx => {
-    ctx.conf = new Configuration ( Fixtures.options );
-  }
+  benchmark ({
+    name: 'advanced',
+    iterations: 1,
+    fn: () => {
+      new Configuration ({
+        providers: [
+          new ProviderMemory ({ scope: 'foo' })
+        ],
+        defaults: Fixtures.defaults,
+        schema: Fixtures.schema
+      });
+    }
+  });
+
+  benchmark ({
+    name: 'json',
+    iterations: 1,
+    fn: ctx => {
+      ctx.conf = new Configuration ( Fixtures.options );
+    }
+  });
+
 });
 
 benchmark ({
@@ -109,162 +113,179 @@ benchmark ({
   }
 });
 
-benchmark ({
-  name: 'get:all',
-  fn: ctx => {
-    ctx.conf.get ();
-  }
+benchmark.group ( 'get', () => {
+
+  benchmark ({
+    name: 'all',
+    fn: ctx => {
+      ctx.conf.get ();
+    }
+  });
+
+  benchmark ({
+    name: '*',
+    fn: ctx => {
+      ctx.conf.get ( '*' );
+    }
+  });
+
+  benchmark ({
+    name: '*:path',
+    fn: ctx => {
+      ctx.conf.get ( '*', 'core.foo' );
+    }
+  });
+
+  benchmark ({
+    name: 'scope:path',
+    fn: ctx => {
+      ctx.conf.get ( 'global', 'core.foo' );
+    }
+  });
+
+  benchmark ({
+    name: 'path',
+    fn: ctx => {
+      ctx.conf.get ( 'core.foo' );
+    }
+  });
+
 });
 
-benchmark ({
-  name: 'get:*',
-  fn: ctx => {
-    ctx.conf.get ( '*' );
-  }
+benchmark.group ( 'has', () => {
+
+  benchmark ({
+    name: '*:path',
+    fn: ctx => {
+      ctx.conf.has ( '*', 'core.foo' );
+    }
+  });
+
+  benchmark ({
+    name: 'scope:path',
+    fn: ctx => {
+      ctx.conf.has ( 'global', 'core.foo' );
+    }
+  });
+
+  benchmark ({
+    name: 'path',
+    fn: ctx => {
+      ctx.conf.has ( 'core.foo' );
+    }
+  });
+
 });
 
-benchmark ({
-  name: 'get:*:path',
-  fn: ctx => {
-    ctx.conf.get ( '*', 'core.foo' );
-  }
+benchmark.group ( 'set', () => {
+
+  benchmark ({
+    name: '*:path',
+    fn: ctx => {
+      ctx.conf.set ( '*', 'core.foo', 'test' );
+      ctx.conf.set ( '*', 'core.foo', 'test' );
+    }
+  });
+
+  benchmark ({
+    name: 'scope:path',
+    fn: ctx => {
+      ctx.conf.set ( 'global', 'core.foo', 'test' );
+      ctx.conf.set ( 'global', 'core.foo', 'test' );
+    }
+  });
+
+  benchmark ({
+    name: 'path',
+    fn: ctx => {
+      ctx.conf.set ( 'core.foo', 'test' );
+      ctx.conf.set ( 'core.foo', 'test' );
+    }
+  });
+
 });
 
-benchmark ({
-  name: 'get:scope:path',
-  fn: ctx => {
-    ctx.conf.get ( 'global', 'core.foo' );
-  }
+benchmark.group ( 'remove', () => {
+
+  benchmark ({
+    name: '*:path',
+    fn: ctx => {
+      ctx.conf.remove ( '*', 'core.foo' );
+      ctx.conf.remove ( '*', 'core.foo' );
+    }
+  });
+
+  benchmark ({
+    name: 'scope:path',
+    fn: ctx => {
+      ctx.conf.remove ( 'global', 'core.foo' );
+      ctx.conf.remove ( 'global', 'core.foo' );
+    }
+  });
+
+  benchmark ({
+    name: '*:path',
+    fn: ctx => {
+      ctx.conf.remove ( 'core.foo' );
+      ctx.conf.remove ( 'core.foo' );
+    }
+  });
+
 });
 
-benchmark ({
-  name: 'get:path',
-  fn: ctx => {
-    ctx.conf.get ( 'core.foo' );
-  }
+benchmark.group ( 'update', () => {
+
+  benchmark ({
+    name: '*',
+    fn: ctx => {
+      ctx.conf.update ( '*', {} );
+    }
+  });
+
+  benchmark ({
+    name: 'scope:obj',
+    fn: ctx => {
+      ctx.conf.update ( 'global', {} );
+      ctx.conf.update ( 'global', {} );
+    }
+  });
+
+  benchmark ({
+    name: 'obj',
+    fn: ctx => {
+      ctx.conf.update ({});
+      ctx.conf.update ({});
+    }
+  });
+
+  benchmark ({
+    name: 'str',
+    fn: ctx => {
+      ctx.conf.update ( '{}' );
+      ctx.conf.update ( '{}' );
+      ctx.conf.update ( '{ /* foo */ }' );
+      ctx.conf.update ( '{ /* foo */ }' );
+    }
+  });
+
 });
 
-benchmark ({
-  name: 'has:*:path',
-  fn: ctx => {
-    ctx.conf.has ( '*', 'core.foo' );
-  }
-});
+benchmark.group ( 'reset', () => {
 
-benchmark ({
-  name: 'has:scope:path',
-  fn: ctx => {
-    ctx.conf.has ( 'global', 'core.foo' );
-  }
-});
+  benchmark ({
+    name: '*',
+    fn: ctx => {
+      ctx.conf.reset ( '*' );
+    }
+  });
 
-benchmark ({
-  name: 'has:path',
-  fn: ctx => {
-    ctx.conf.has ( 'core.foo' );
-  }
-});
+  benchmark ({
+    name: 'scope',
+    fn: ctx => {
+      ctx.conf.reset ( 'global' );
+    }
+  });
 
-benchmark ({
-  name: 'set:*:path',
-  fn: ctx => {
-    ctx.conf.set ( '*', 'core.foo', 'test' );
-    ctx.conf.set ( '*', 'core.foo', 'test' );
-  }
-});
-
-benchmark ({
-  name: 'set:scope:path',
-  fn: ctx => {
-    ctx.conf.set ( 'global', 'core.foo', 'test' );
-    ctx.conf.set ( 'global', 'core.foo', 'test' );
-  }
-});
-
-benchmark ({
-  name: 'set:path',
-  fn: ctx => {
-    ctx.conf.set ( 'core.foo', 'test' );
-    ctx.conf.set ( 'core.foo', 'test' );
-  }
-});
-
-benchmark ({
-  name: 'remove:*:path',
-  fn: ctx => {
-    ctx.conf.remove ( '*', 'core.foo' );
-    ctx.conf.remove ( '*', 'core.foo' );
-  }
-});
-
-benchmark ({
-  name: 'remove:scope:path',
-  fn: ctx => {
-    ctx.conf.remove ( 'global', 'core.foo' );
-    ctx.conf.remove ( 'global', 'core.foo' );
-  }
-});
-
-benchmark ({
-  name: 'remove:*:path',
-  fn: ctx => {
-    ctx.conf.remove ( 'core.foo' );
-    ctx.conf.remove ( 'core.foo' );
-  }
-});
-
-benchmark ({
-  name: 'update:*',
-  fn: ctx => {
-    ctx.conf.update ( '*', {} );
-  }
-});
-
-benchmark ({
-  name: 'update:scope:obj',
-  fn: ctx => {
-    ctx.conf.update ( 'global', {} );
-    ctx.conf.update ( 'global', {} );
-  }
-});
-
-benchmark ({
-  name: 'update:obj',
-  fn: ctx => {
-    ctx.conf.update ({});
-    ctx.conf.update ({});
-  }
-});
-
-benchmark ({
-  name: 'update:str',
-  fn: ctx => {
-    ctx.conf.update ( '{}' );
-    ctx.conf.update ( '{}' );
-    ctx.conf.update ( '{ /* foo */ }' );
-    ctx.conf.update ( '{ /* foo */ }' );
-  }
-});
-
-benchmark ({
-  name: 'reset:*',
-  fn: ctx => {
-    ctx.conf.reset ( '*' );
-  }
-});
-
-benchmark ({
-  name: 'reset:*',
-  fn: ctx => {
-    ctx.conf.reset ( '*' );
-  }
-});
-
-benchmark ({
-  name: 'reset:scope',
-  fn: ctx => {
-    ctx.conf.reset ( 'global' );
-  }
 });
 
 benchmark ({
@@ -288,3 +309,5 @@ benchmark ({
     ctx.conf.triggerChange ( 'local', 'core.foo', 'test' );
   }
 });
+
+benchmark.summary ();
