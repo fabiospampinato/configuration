@@ -827,7 +827,61 @@ describe ( 'Configuration', () => {
 
   });
 
-  describe ( 'watching', it => {
+  describe ( 'path swapping', it => {
+
+    it.only ( 'works', t => {
+
+      const foo = new ProviderJSON ({
+        scope: 'foo',
+        path: undefined,
+        watch: true
+      });
+
+      const options = {
+        providers: [foo],
+        defaults: Fixtures.defaults,
+        schema: Fixtures.schema
+      };
+
+      const conf = new Configuration ( options );
+
+      t.is ( conf.scopes.foo.watching, true );
+      t.is ( conf.scopes.foo.watcher, undefined );
+
+      t.is ( conf.get ( 'core.foo' ), 'defaults' );
+
+      foo.writeSync ( Fixtures.local.data );
+
+      t.is ( conf.get ( 'core.foo' ), 'local' );
+
+      foo.swap ();
+
+      t.is ( conf.get ( 'core.foo' ), 'local' );
+
+      const tempPath = tempy.file ({ extension: 'json' });
+
+      fs.writeFileSync ( tempPath, '{ "core": { "foo": "temp" } }' );
+
+      foo.swap ( tempPath );
+
+      t.is ( conf.scopes.foo.watching, true );
+      t.is ( !!conf.scopes.foo.watcher, true );
+
+      t.is ( conf.get ( 'core.foo' ), 'temp' );
+
+      const tempPath2 = tempy.file ({ extension: 'json' });
+
+      fs.writeFileSync ( tempPath2, '{ "core": { "foo": "temp2" } }' );
+
+      foo.swap ( tempPath2 );
+
+      t.is ( conf.get ( 'core.foo' ), 'temp2' );
+
+    });
+
+  });
+
+  describe ( 'path watching', it => {
 
     it ( 'can be disabled', t => {
 
@@ -847,6 +901,7 @@ describe ( 'Configuration', () => {
 
       const conf = new Configuration ( options );
 
+      t.is ( conf.scopes.foo.watching, false );
       t.is ( conf.scopes.foo.watcher, undefined );
 
     });

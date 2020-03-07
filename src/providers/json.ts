@@ -13,6 +13,8 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
   async read (): Promise<DataUpdate> {
 
+    if ( !this.path ) return super.read ();
+
     try {
 
       const dataRaw = await File.read ( this.path, { encoding: 'utf8' } ) || DEFAULTS.dataRaw,
@@ -31,6 +33,8 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
   }
 
   readSync (): DataUpdate {
+
+    if ( !this.path ) return super.readSync ();
 
     try {
 
@@ -51,6 +55,8 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
   async write ( data: Data | DataRaw, force: boolean = false ): Promise<void> {
 
+    if ( !this.path ) return super.write ( data, force );
+
     if ( !force && this.isEqual ( data ) ) return;
 
     await super.write ( data, true );
@@ -60,6 +66,8 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
   }
 
   writeSync ( data: Data | DataRaw, force: boolean = false ): void {
+
+    if ( !this.path ) return super.writeSync ( data, force );
 
     if ( !force && this.isEqual ( data ) ) return;
 

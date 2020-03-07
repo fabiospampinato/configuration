@@ -10,7 +10,7 @@ class ProviderLocalStorage<Options extends ProviderStorageOptions = ProviderStor
 
   constructor ( options?: Partial<Options> ) {
 
-    options = { storage: localStorage, ...options } as Partial<Options>; //TSC
+    options = { ...options, storage: localStorage } as Partial<Options>; //TSC
 
     super ( options );
 

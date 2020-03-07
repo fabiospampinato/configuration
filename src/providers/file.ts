@@ -10,18 +10,17 @@ import ProviderMemory from './memory';
 
 class ProviderFile<Options extends ProviderFileOptions = ProviderFileOptions> extends ProviderMemory<Options> {
 
-  path: string;
+  path?: string;
+  watching: boolean;
   watcher?: FSWatcher;
 
   constructor ( options: Partial<Options> ) {
 
     super ( options );
 
-    if ( !options.path ) throw new Error ( 'You need to provide a path' );
+    this.watching = !!options.watch;
 
-    this.path = options.path;
-
-    if ( options.watch !== false ) this.watch ();
+    this.swap ( options.path, true );
 
   }
 
@@ -31,11 +30,33 @@ class ProviderFile<Options extends ProviderFileOptions = ProviderFileOptions> ex
 
   }
 
+  swap ( path?: string, _initial: boolean = false ): void {
+
+    if ( path === this.path ) return;
+
+    this.dispose ();
+
+    this.path = path;
+
+    this.init ();
+
+    if ( !_initial ) this.triggerChange ();
+
+    if ( this.watching ) this.watch ();
+
+  }
+
   watch (): void {
 
-    this.watcher = File.watch ( this.path, async () => {
+    if ( !this.path ) return;
+
+    const path = this.path;
+
+    this.watcher = File.watch ( path, async () => {
 
       const {data, dataRaw} = await this.read ();
+
+      if ( path !== this.path ) return;
 
       if ( this.isEqual ( dataRaw ) && this.isEqual ( data ) ) return;
 

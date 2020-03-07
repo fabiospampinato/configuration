@@ -10,7 +10,7 @@ class ProviderSessionStorage<Options extends ProviderStorageOptions = ProviderSt
 
   constructor ( options?: Partial<Options> ) {
 
-    options = { storage: sessionStorage, ...options } as Partial<Options>; //TSC
+    options = { ...options, storage: sessionStorage } as Partial<Options>; //TSC
 
     super ( options );
 

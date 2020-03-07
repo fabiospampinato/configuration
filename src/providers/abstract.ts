@@ -55,11 +55,7 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
 
   triggerChange (): void {
 
-    for ( let i = 0, l = this.handlers.length; i < l; i++ ) {
-
-      this.handlers[i]();
-
-    }
+    this.handlers.forEach ( handler => handler () );
 
   }
 
