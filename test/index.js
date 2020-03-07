@@ -570,14 +570,27 @@ describe ( 'Configuration', () => {
 
     });
 
-    it ( 'can remove in the default scope', t => {
+    it ( 'will remove in all scopes by default', async t => {
 
       const conf = new Configuration ( Fixtures.options );
 
       conf.remove ( 'core.foo' );
 
       t.is ( conf.get ( 'global', 'core.foo' ), undefined );
-      t.is ( conf.get ( 'core.foo' ), 'local' );
+      t.is ( conf.get ( 'local', 'core.foo' ), undefined );
+      t.is ( conf.get ( 'core.foo' ), 'defaults' );
+
+      conf.remove ( 'core.bar' );
+
+      t.is ( conf.get ( 'global', 'core.bar' ), undefined );
+      t.is ( conf.get ( 'local', 'core.bar' ), undefined );
+      t.is ( conf.get ( 'core.bar' ), 'defaults' );
+
+      conf.remove ( 'core.qux' );
+
+      t.is ( conf.get ( 'global', 'core.qux' ), undefined );
+      t.is ( conf.get ( 'local', 'core.qux' ), undefined );
+      t.is ( conf.get ( 'core.qux' ), 'defaults' );
 
     });
 

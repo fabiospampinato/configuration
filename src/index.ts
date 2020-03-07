@@ -327,7 +327,7 @@ class Configuration {
   remove ( path: Path ): void;
   remove ( scope: Scope | Path, path?: Path ): void {
 
-    if ( Type.isUndefined ( path ) ) return this.remove ( this.scope, scope ); // Path
+    if ( Type.isUndefined ( path ) ) return this.remove ( SCOPE_ALL, scope ); // Path
 
     if ( scope === SCOPE_ALL ) { // All
 
