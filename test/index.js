@@ -487,12 +487,32 @@ describe ( 'Configuration', () => {
       conf.set ( 'core.test', 0 );
 
       t.is ( conf.get ( 'global', 'core.test' ), 0 );
+      t.is ( conf.get ( 'local', 'core.test' ), undefined );
       t.is ( conf.get ( 'core.test' ), 0 );
+
+    });
+
+    it ( 'can set in the first appropriate scope', t => {
+
+      const conf = new Configuration ( Fixtures.options );
 
       conf.set ( 'core.foo', 'test' );
 
-      t.is ( conf.get ( 'global', 'core.foo' ), 'test' );
-      t.is ( conf.get ( 'core.foo' ), 'local' );
+      t.is ( conf.get ( 'global', 'core.foo' ), 'global' );
+      t.is ( conf.get ( 'local', 'core.foo' ), 'test' );
+      t.is ( conf.get ( 'core.foo' ), 'test' );
+
+      conf.set ( 'core.bar', 'test' );
+
+      t.is ( conf.get ( 'global', 'core.bar' ), 'test' );
+      t.is ( conf.get ( 'local', 'core.bar' ), undefined );
+      t.is ( conf.get ( 'core.bar' ), 'test' );
+
+      conf.set ( 'core.qux', 'test' );
+
+      t.is ( conf.get ( 'global', 'core.qux' ), 'test' );
+      t.is ( conf.get ( 'local', 'core.qux' ), undefined );
+      t.is ( conf.get ( 'core.qux' ), 'test' );
 
     });
 

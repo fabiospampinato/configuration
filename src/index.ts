@@ -17,6 +17,8 @@ import Type from './utils/type';
 
 class Configuration {
 
+  /* VARIABLES */
+
   providers: Provider[];
   scopes: Scopes;
   defaults: Provider;
@@ -25,6 +27,8 @@ class Configuration {
   scope: Scope;
   dataSchema: Data;
   handlers: ChangeHandlerData[];
+
+  /* CONSTRUCTOR */
 
   constructor ( options: Partial<Options> ) {
 
@@ -61,6 +65,24 @@ class Configuration {
     this.init ();
 
   }
+
+  /* HELPERS */
+
+  _getTargetScopeForPath ( path: Path ): Scope {
+
+    for ( let i = 0, l = this.providers.length - 1; i < l; i++ ) {
+
+      const {scope} = this.providers[i];
+
+      if ( this.has ( scope, path ) ) return scope;
+
+    }
+
+    return this.scope;
+
+  }
+
+  /* API */
 
   init (): void {
 
@@ -262,7 +284,7 @@ class Configuration {
   set ( path: Path, value: Value ): void;
   set ( scope: Scope | Path, path: Path | Value, value?: Value ): void {
 
-    if ( Type.isUndefined ( value ) ) return this.set ( this.scope, scope, path ); // Path
+    if ( Type.isUndefined ( value ) ) return this.set ( this._getTargetScopeForPath ( scope ), scope, path ); // Path
 
     if ( !Type.isString ( path ) ) return; //TSC
 
