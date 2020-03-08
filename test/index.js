@@ -829,7 +829,7 @@ describe ( 'Configuration', () => {
 
   describe ( 'path swapping', it => {
 
-    it.only ( 'works', t => {
+    it ( 'works', t => {
 
       const foo = new ProviderJSON ({
         scope: 'foo',
