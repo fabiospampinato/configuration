@@ -11,7 +11,7 @@ import ProviderMemory from './memory';
 class ProviderStorage<Options extends ProviderStorageOptions = ProviderStorageOptions> extends ProviderMemory<Options> {
 
   id: string;
-  storage: Storage;
+  storage?: Storage;
 
   constructor ( options: Partial<Options> ) {
 
@@ -22,9 +22,13 @@ class ProviderStorage<Options extends ProviderStorageOptions = ProviderStorageOp
     this.id = options?.id ?? DEFAULTS.id;
     this.storage = options.storage;
 
+    this.init ();
+
   }
 
   readSync (): DataUpdate {
+
+    if ( !this.storage ) return super.readSync ();
 
     const dataRaw = this.storage.getItem ( this.id ) || DEFAULTS.dataRaw,
           data = Serializer.deserialize ( dataRaw );
@@ -34,6 +38,8 @@ class ProviderStorage<Options extends ProviderStorageOptions = ProviderStorageOp
   }
 
   writeSync ( data: Data | DataRaw, force: boolean = false ): void {
+
+    if ( !this.storage ) return super.writeSync ( data, force );
 
     if ( !force && this.isEqual ( data ) ) return;
 
