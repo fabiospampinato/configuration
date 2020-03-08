@@ -43,7 +43,7 @@
     "performant"
   ],
   "engines": {
-    "node": ">= 10"
+    "node": ">= 10.11"
   },
   "dependencies": {
     "ajv": "^6.12.0",
