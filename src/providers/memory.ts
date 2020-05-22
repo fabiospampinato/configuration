@@ -3,7 +3,6 @@
 
 import {Data, DataRaw, DataUpdate, ProviderMemoryOptions} from '../types';
 import {DEFAULTS} from '../config';
-import Serializer from '../utils/serializer';
 import Type from '../utils/type';
 import ProviderAbstract from './abstract';
 
@@ -38,14 +37,14 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
     if ( Type.isString ( data ) ) {
 
-      this.data = Serializer.deserialize ( data );
+      this.data = this.dataParser.parse ( data );
       this.dataRaw = data;
       this.dataSchema = this.validate ( this.data );
 
     } else {
 
       this.data = data;
-      this.dataRaw = Serializer.serialize ( this.data, this.indentation );
+      this.dataRaw = this.dataParser.stringify ( this.data );
       this.dataSchema = this.validate ( this.data );
 
     }

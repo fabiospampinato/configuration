@@ -4,7 +4,6 @@
 import {Data, DataRaw, DataUpdate, ProviderJSONOptions} from '../types';
 import {DEFAULTS} from '../config';
 import File from '../utils/file';
-import Serializer from '../utils/serializer';
 import ProviderFile from './file';
 
 /* JSON */
@@ -18,7 +17,7 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
     try {
 
       const dataRaw = await File.read ( this.path, { encoding: 'utf8' } ) ?? DEFAULTS.dataRaw,
-            data = Serializer.deserialize ( dataRaw );
+            data = this.dataParser.parse ( dataRaw );
 
       return {data, dataRaw};
 
@@ -39,7 +38,7 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
     try {
 
       const dataRaw = File.readSync ( this.path, { encoding: 'utf8' } ) ?? DEFAULTS.dataRaw,
-            data = Serializer.deserialize ( dataRaw );
+            data = this.dataParser.parse ( dataRaw );
 
       return {data, dataRaw};
 

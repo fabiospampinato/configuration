@@ -39,6 +39,14 @@ describe ( 'Configuration', () => {
 
     });
 
+    it ( 'supports a custom parser', t => {
+
+      const conf = new Configuration ( Fixtures.options ({ parser: JSON }) );
+
+      t.is ( conf.scopes.global.dataRaw, JSON.stringify ( conf.scopes.global.data ) );
+
+    });
+
     it ( 'throws if no providers are passed', t => {
 
       t.throws ( () => {
@@ -908,7 +916,7 @@ describe ( 'Configuration', () => {
 
     it ( 'detects when a file gets updated', async t => {
 
-      const conf = new Configuration ( Fixtures.options ( true ) );
+      const conf = new Configuration ( Fixtures.options ({ watch: true }) );
 
       // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
 
@@ -930,7 +938,7 @@ describe ( 'Configuration', () => {
 
     it ( 'handles invalid data', async t => {
 
-      const conf = new Configuration ( Fixtures.options ( true ) );
+      const conf = new Configuration ( Fixtures.options ({ watch: true }) );
 
       // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
 
@@ -947,7 +955,7 @@ describe ( 'Configuration', () => {
 
     it ( 'preserves empty contents', async t => {
 
-      const conf = new Configuration ( Fixtures.options ( true ) );
+      const conf = new Configuration ( Fixtures.options ({ watch: true }) );
 
       // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
 
@@ -965,7 +973,7 @@ describe ( 'Configuration', () => {
 
     it ( 'preserves the formatting in the new string', async t => {
 
-      const conf = new Configuration ( Fixtures.options ( true ) );
+      const conf = new Configuration ( Fixtures.options ({ watch: true }) );
 
       // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
 

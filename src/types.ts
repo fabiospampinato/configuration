@@ -22,6 +22,11 @@ type DataUpdate = {
   dataRaw: DataRaw
 };
 
+type DataParser = {
+  parse: ( raw: DataRaw ) => Data,
+  stringify: ( data: Data ) => DataRaw
+};
+
 type Value = ValuePrimitive | ValueArray | ValueObject;
 type ValuePrimitive = null | boolean | number | string;
 type ValueArray = Array<Value>;
@@ -59,7 +64,8 @@ type ProviderChangeHandler = () => void;
 
 type ProviderAbstractOptions = {
   scope: string,
-  indentation: string | number
+  indentation?: string | number,
+  parser?: DataParser
 };
 
 type ProviderFileOptions = ProviderAbstractOptions & {
@@ -78,4 +84,4 @@ type ProviderStorageOptions = ProviderAbstractOptions & {
 
 /* EXPORT */
 
-export {Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, ExtendData, Value, ValueObject, Schema, ChangeHandler, ChangeHandlerData, Disposer, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};
+export {Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, ExtendData, Value, ValueObject, Schema, ChangeHandler, ChangeHandlerData, Disposer, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};

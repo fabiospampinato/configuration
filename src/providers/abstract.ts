@@ -2,8 +2,9 @@
 /* IMPORT */
 
 import isEqual from 'plain-object-is-equal';
-import {Disposer, Data, DataRaw, DataUpdate, ProviderChangeHandler, ProviderAbstractOptions} from '../types';
+import {Disposer, Data, DataRaw, DataUpdate, DataParser, ProviderChangeHandler, ProviderAbstractOptions} from '../types';
 import {DEFAULTS, SCOPE_ALL} from '../config';
+import Parser from '../utils/parser';
 import Type from '../utils/type';
 
 /* ABSTRACT */
@@ -11,10 +12,10 @@ import Type from '../utils/type';
 abstract class ProviderAbstract<Options extends ProviderAbstractOptions = ProviderAbstractOptions> {
 
   scope: string;
-  indentation: string | number;
   data: Data;
   dataRaw: DataRaw;
   dataSchema: Data;
+  dataParser: DataParser;
   handlers: ProviderChangeHandler[];
 
   constructor ( options?: Partial<Options> ) {
@@ -22,7 +23,7 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
     if ( options?.scope === SCOPE_ALL ) throw new Error ( `"${SCOPE_ALL}" is not a valid scope name for a provider` );
 
     this.scope = options?.scope ?? DEFAULTS.scope;
-    this.indentation = options?.indentation ?? DEFAULTS.indentation;
+    this.dataParser = options?.parser ?? new Parser ( options?.indentation ?? DEFAULTS.indentation );
     this.handlers = [];
 
     this.init ();

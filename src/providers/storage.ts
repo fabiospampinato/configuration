@@ -3,7 +3,6 @@
 
 import {Data, DataRaw, DataUpdate, ProviderStorageOptions} from '../types';
 import {DEFAULTS} from '../config';
-import Serializer from '../utils/serializer';
 import ProviderMemory from './memory';
 
 /* STORAGE */
@@ -31,7 +30,7 @@ class ProviderStorage<Options extends ProviderStorageOptions = ProviderStorageOp
     if ( !this.storage ) return super.readSync ();
 
     const dataRaw = this.storage.getItem ( this.id ) ?? DEFAULTS.dataRaw,
-          data = Serializer.deserialize ( dataRaw );
+          data = this.dataParser.parse ( dataRaw );
 
     return {data, dataRaw};
 
