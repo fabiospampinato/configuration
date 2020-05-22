@@ -7,7 +7,7 @@ import * as fs from 'graceful-fs';
 
 const Folder = {
   ensure ( folderPath: string ): Promise<void> {
-    return fs.promises.mkdir ( folderPath, { recursive: true } ).catch ( () => {} );
+    return fs.promises.mkdir ( folderPath, { recursive: true } ).then ( () => {}, () => {} );
   },
   ensureSync ( folderPath: string ): void {
     try {
