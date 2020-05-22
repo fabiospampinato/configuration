@@ -58,7 +58,7 @@ class ProviderFile<Options extends ProviderFileOptions = ProviderFileOptions> ex
 
       if ( path !== this.path ) return;
 
-      if ( this.isEqual ( dataRaw ) && this.isEqual ( data ) ) return;
+      if ( this.isEqual ( dataRaw ) ) return;
 
       super.write ( data, true );
 
