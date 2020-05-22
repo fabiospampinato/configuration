@@ -25,8 +25,8 @@ const File = {
   },
   watch ( filePath: string, callback: Function ): FSWatcher {
     const watcher = require ( 'chokidar-watcher' ); // Lazy import for performance
-    const change = () => callback ();
-    return watcher ( filePath, {}, {change} );
+    const handler = () => callback ();
+    return watcher ( filePath, {}, handler );
   }
 };
 
