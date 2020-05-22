@@ -33,7 +33,20 @@ class Parser {
 
     try {
 
-      return JSON.stringify ( data, undefined, this.indentation );
+      if ( !Type.isArray ( data ) ) return JSON.stringify ( data, undefined, this.indentation );
+
+      //TODO: Publish the following code as 2 separate packages
+
+      const lines = data.map ( item => JSON.stringify ( item, undefined, ' ' )
+                        .replace ( /\[\s*?(?:\r?\n|\r)\s*/g, '[' )
+                        .replace ( /\s*?(?:\r?\n|\r)\s*]/g, ']' )
+                        .replace ( /{\s*?(?:\r?\n|\r)\s*/g, '{ ' )
+                        .replace ( /\s*?(?:\r?\n|\r)\s*}/g, ' }' )
+                        .replace ( /,\s*?(?:\r?\n|\r)\s*/g, ', ' ) );
+
+      const indentation = Type.isString ( this.indentation ) ? this.indentation : ' '.repeat ( this.indentation || 0 );
+
+      return `[\n${indentation}${lines.join ( `,\n${indentation}` )}\n]`;
 
     } catch {}
 
