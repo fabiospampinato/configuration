@@ -8,7 +8,7 @@ import cloneDeep from 'plain-object-clone';
 import isEqual from 'plain-object-is-equal';
 import merge from 'plain-object-merge';
 import {Scope, ScopeAll, Scopes, Path, Value, Data, DataRaw, Schema, ExtendData, Disposer, ChangeHandler, ChangeHandlerData, Options, Provider} from './types';
-import {DEFAULTS, SCOPE_ALL, SCOPE_DEFAULTS} from './config';
+import {SCOPE_ALL, SCOPE_DEFAULTS} from './config';
 import ProviderMemory from './providers/memory';
 import AJV from './utils/ajv';
 import Type from './utils/type';
@@ -22,6 +22,7 @@ class Configuration {
   providers: Provider[];
   scopes: Scopes;
   defaults: Provider;
+  isArray: boolean;
   schema?: Schema;
   validator?: ValidateFunction;
   scope: Scope;
@@ -38,6 +39,8 @@ class Configuration {
     this.scopes = {};
     this.scope = options.scope ?? this.providers[this.providers.length - 1].scope;
     this.handlers = [];
+
+    this.isArray = Array.isArray ( options.defaults );
 
     this.defaults = new ProviderMemory ({ scope: SCOPE_DEFAULTS });
     this.defaults.writeSync ( options.defaults ? pp.unflat ( options.defaults ) : {}, true );
@@ -188,9 +191,10 @@ class Configuration {
 
   refresh (): void {
 
-    const datas = this.providers.map ( provider => provider.dataSchema ).reverse ();
+    const datas = this.providers.map ( provider => provider.dataSchema ).reverse (),
+          datasFiltered = datas.filter ( data => Array.isArray ( data ) === this.isArray );
 
-    this.dataSchema = merge ( datas );
+    this.dataSchema = this.isArray ? Array.prototype.concat ( ...datasFiltered ) : merge ( datasFiltered );
 
     this.triggerChange ();
 
@@ -203,6 +207,8 @@ class Configuration {
     const clone = cloneDeep ( data );
 
     this.validator ( clone );
+
+    if ( Array.isArray ( clone ) ) return clone.filter ( x => !Type.isUndefined ( x ) );
 
     return clone;
 
@@ -402,7 +408,27 @@ class Configuration {
   reset ( scope: Scope ): void;
   reset ( scope: Scope = SCOPE_ALL ): void {
 
-    return this.update ( scope, DEFAULTS.dataRaw );
+    if ( scope === SCOPE_ALL ) { // All
+
+      for ( let scope in this.scopes ) {
+
+        if ( scope === SCOPE_DEFAULTS ) continue;
+
+        this.scopes[scope].write ( this.scopes[scope].defaultsRaw );
+
+      }
+
+    } else { // Scope
+
+      if ( scope === SCOPE_DEFAULTS ) throw new Error ( 'You can\'t reset the "defaults" scope' );
+
+      const provider = this.scopes[scope];
+
+      if ( !provider ) throw new Error ( 'You can\'t reset unknown scopes' );
+
+      provider.write ( provider.defaultsRaw );
+
+    }
 
   }
 

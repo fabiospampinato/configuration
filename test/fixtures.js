@@ -100,6 +100,78 @@ const Fixtures = {
   }
 };
 
+const FixturesArray = {
+  options ( providerOptions = {} ) {
+
+    const local = new ProviderJSON ( Object.assign ({
+      scope: 'local',
+      path: tempy.file ({ extension: 'json' }),
+      defaults: [],
+      defaultsRaw: '[]',
+    }, providerOptions ));
+
+    local.writeSync ( FixturesArray.local ().data );
+
+    const global = new ProviderJSON ( Object.assign ({
+      scope: 'global',
+      path: tempy.file ({ extension: 'json' }),
+      defaults: [],
+      defaultsRaw: '[]'
+    }, providerOptions ));
+
+    global.writeSync ( FixturesArray.global ().data );
+
+    return {
+      providers: [local, global],
+      defaults: FixturesArray.defaults (),
+      schema: FixturesArray.schema ()
+    };
+
+  },
+  defaults () {
+    return [
+      { foo: 'defaults' },
+      { foo: 'defaults2' }
+    ];
+  },
+  schema () {
+    return {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['foo'],
+        properties: {
+          foo: {
+            type: 'string'
+          },
+          arr: {
+            type: 'array',
+            items: {
+              type: 'number'
+            }
+          }
+        }
+      }
+    };
+  },
+  local () {
+    return {
+      data: [
+        { foo: 'local' },
+        { foo: 'local', arr: ['1', '2', '3'] }
+      ]
+    };
+  },
+  global () {
+    return {
+      data: [
+        { foo: 'global', arr: [1, 2, 3] },
+        { test: {} }
+      ]
+    };
+  }
+};
+
 /* EXPORT */
 
-module.exports = Fixtures;
+module.exports = {Fixtures, FixturesArray};

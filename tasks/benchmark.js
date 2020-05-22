@@ -3,7 +3,7 @@
 
 const {default: Configuration} = require ( '../dist' ),
       {default: ProviderMemory} = require ( '../dist/providers/memory' ),
-      Fixtures = require ( '../test/fixtures' ),
+      {Fixtures} = require ( '../test/fixtures' ),
       benchmark = require ( 'benchloop' );
 
 /* HELPERS */

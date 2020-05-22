@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import * as isPrimitive from 'is-primitive';
-import {ValueObject} from '../types';
+import {ValueArray, ValueObject} from '../types';
 
 /* TYPE */
 
@@ -14,7 +14,7 @@ const Type = {
 
   },
 
-  isObject ( x: any ): x is ValueObject {
+  isObject ( x: any ): x is ValueArray | ValueObject {
 
     return !isPrimitive ( x );
 

@@ -9,11 +9,12 @@ import {describe} from 'ava-spec';
 import Configuration from '../dist';
 import ProviderJSON from '../dist/providers/json';
 import ProviderMemory from '../dist/providers/memory';
-import Fixtures from './fixtures';
+import {Fixtures, FixturesArray} from './fixtures';
 
 /* CONFIGURATION */
 
 //TODO: Add some tests for the other providers
+//TODO: Add more array-based tests, and improve existing ones
 
 describe ( 'Configuration', () => {
 
@@ -97,7 +98,7 @@ describe ( 'Configuration', () => {
 
     it ( 'disposes all providers', t => {
 
-      const conf = new Configuration ( Fixtures.options () );
+      const conf = new Configuration ( Fixtures.options ({ watch: true }) );
 
       conf.dispose ();
 
@@ -267,6 +268,22 @@ describe ( 'Configuration', () => {
 
       t.is ( conf.get ( 'core.bar' ), 'defaults' );
       t.false ( _.isEqual ( conf.get (), dataPrev ) );
+
+    });
+
+    it ( 'supports arrays', t => {
+
+      const conf = new Configuration ( FixturesArray.options () );
+
+      const dataExpected = [
+        { foo: 'defaults' },
+        { foo: 'defaults2' },
+        { foo: 'global', arr: [1, 2, 3] },
+        { foo: 'local' },
+        { foo: 'local', arr: undefined } //FIXME: `arr` here should not exist at all
+      ];
+
+      t.true ( _.isEqual ( conf.get (), dataExpected ) );
 
     });
 
@@ -776,6 +793,28 @@ describe ( 'Configuration', () => {
       t.false ( _.isEqual ( datas.defaults, {} ) );
       t.false ( _.isEqual ( datas.local, {} ) );
       t.true ( _.isEqual ( datas.global, {} ) );
+
+    });
+
+    it ( 'supports arrays', t => {
+
+      const conf = new Configuration ( FixturesArray.options () );
+
+      conf.reset ( 'global' );
+
+      const datas = conf.get ( '*' );
+
+      t.true ( _.isEqual ( datas.defaults, [{ foo: 'defaults' }, { foo: 'defaults2' }] ) );
+      t.true ( _.isEqual ( datas.local, [{ foo: 'local' }, { foo: 'local', arr: undefined }] ) ); //FIXME: `arr` here should not exist at all
+      t.true ( _.isEqual ( datas.global, [] ) );
+
+      conf.reset ();
+
+      const datas2 = conf.get ( '*' );
+
+      t.true ( _.isEqual ( datas2.defaults, [{ foo: 'defaults' }, { foo: 'defaults2' }] ) );
+      t.true ( _.isEqual ( datas2.local, [] ) );
+      t.true ( _.isEqual ( datas2.global, [] ) );
 
     });
 

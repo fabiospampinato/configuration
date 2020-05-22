@@ -15,7 +15,7 @@ type Scopes = {
 
 type Path = string;
 
-type Data = ValueObject;
+type Data = ValueArray | ValueObject;
 type DataRaw = string;
 type DataUpdate = {
   data: Data,
@@ -86,4 +86,4 @@ type ProviderStorageOptions = ProviderAbstractOptions & {
 
 /* EXPORT */
 
-export {Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, ExtendData, Value, ValueObject, Schema, ChangeHandler, ChangeHandlerData, Disposer, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};
+export {Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, ExtendData, Value, ValueArray, ValueObject, Schema, ChangeHandler, ChangeHandlerData, Disposer, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};

@@ -52,7 +52,7 @@
     "graceful-fs": "^4.2.4",
     "is-primitive": "^3.0.1",
     "json5": "^2.1.3",
-    "path-prop": "^1.0.1",
+    "path-prop": "^1.1.0",
     "plain-object-clone": "^1.1.0",
     "plain-object-is-equal": "^1.0.0",
     "plain-object-merge": "^1.0.1",
