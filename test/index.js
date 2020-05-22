@@ -76,7 +76,7 @@ describe ( 'Configuration', () => {
       conf.dispose ();
 
       conf.providers.forEach ( provider => {
-        t.is ( provider.listener, undefined );
+        t.is ( provider.watcher, undefined );
       });
 
     });
@@ -906,11 +906,13 @@ describe ( 'Configuration', () => {
 
     });
 
-    it.skip ( 'detects when a file gets updated', async t => { //FIXME: Not watching properly //FIXME: It blows up the heap for some reason
+    it ( 'detects when a file gets updated', async t => {
 
-      const conf = new Configuration ( Fixtures.options () );
+      const conf = new Configuration ( Fixtures.options ( true ) );
 
-      await new Promise ( resolve => conf.scopes.global.listener.on ( 'ready', resolve ) );
+      // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
+
+      await delay ( 1000 );
 
       fs.writeFileSync ( conf.scopes.global.path, JSON.stringify ({
         core: {
@@ -919,22 +921,24 @@ describe ( 'Configuration', () => {
         }
       }));
 
-      await delay ( 500 );
+      await delay ( 1500 );
 
       t.is ( conf.get ( 'core.bar' ), 'custom' );
-      t.is ( conf.get ( 'core.test' ), 'custom' );
+      t.is ( conf.get ( 'core.test' ), undefined );
 
     });
 
-    it.skip ( 'handles invalid data', async t => { //FIXME: Not watching properly //FIXME: It blows up the heap for some reason
+    it ( 'handles invalid data', async t => {
 
-      const conf = new Configuration ( Fixtures.options () );
+      const conf = new Configuration ( Fixtures.options ( true ) );
 
-      await new Promise ( resolve => conf.scopes.global.listener.on ( 'ready', resolve ) );
+      // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
+
+      await delay ( 1000 );
 
       fs.writeFileSync ( conf.scopes.global.path, '{' );
 
-      await delay ( 500 );
+      await delay ( 1500 );
 
       t.is ( conf.get ( 'core.bar' ), 'defaults' );
       t.true ( _.isEqual ( conf.scopes.global.dataSchema, {} ) );

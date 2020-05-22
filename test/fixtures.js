@@ -7,18 +7,20 @@ const tempy = require ( 'tempy' ),
 /* FIXTURES */
 
 const Fixtures = {
-  options () {
+  options ( watch = false ) {
 
     const local = new ProviderJSON ({
       scope: 'local',
-      path: tempy.file ({ extension: 'json' })
+      path: tempy.file ({ extension: 'json' }),
+      watch
     });
 
     local.writeSync ( Fixtures.local ().data );
 
     const global = new ProviderJSON ({
       scope: 'global',
-      path: tempy.file ({ extension: 'json' })
+      path: tempy.file ({ extension: 'json' }),
+      watch
     });
 
     global.writeSync ( Fixtures.global ().data );
