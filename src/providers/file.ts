@@ -54,13 +54,13 @@ class ProviderFile<Options extends ProviderFileOptions = ProviderFileOptions> ex
 
     this.watcher = File.watch ( path, async () => {
 
-      const {data, dataRaw} = await this.read ();
+      const {dataRaw} = await this.read ();
 
       if ( path !== this.path ) return;
 
       if ( this.isEqual ( dataRaw ) ) return;
 
-      super.write ( data, true );
+      super.write ( dataRaw, true );
 
     });
 

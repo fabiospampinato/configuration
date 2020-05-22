@@ -945,6 +945,31 @@ describe ( 'Configuration', () => {
 
     });
 
+    it ( 'preserves the formatting in the new string', async t => {
+
+      const conf = new Configuration ( Fixtures.options ( true ) );
+
+      // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
+
+      await delay ( 1000 );
+
+      const dataNext = JSON.stringify ({
+        core: {
+          bar: 'custom',
+          test: 'custom'
+        }
+      });
+
+      fs.writeFileSync ( conf.scopes.global.path, dataNext );
+
+      await delay ( 1500 );
+
+      t.is ( conf.get ( 'core.bar' ), 'custom' );
+      t.is ( conf.get ( 'core.test' ), undefined );
+      t.is ( conf.scopes.global.dataRaw, dataNext );
+
+    });
+
   });
 
 });
