@@ -7,30 +7,30 @@ const tempy = require ( 'tempy' ),
 /* FIXTURES */
 
 const Fixtures = {
-  get options () {
+  options () {
 
     const local = new ProviderJSON ({
       scope: 'local',
       path: tempy.file ({ extension: 'json' })
     });
 
-    local.writeSync ( Fixtures.local.data );
+    local.writeSync ( Fixtures.local ().data );
 
     const global = new ProviderJSON ({
       scope: 'global',
       path: tempy.file ({ extension: 'json' })
     });
 
-    global.writeSync ( Fixtures.global.data );
+    global.writeSync ( Fixtures.global ().data );
 
     return {
       providers: [local, global],
-      defaults: Fixtures.defaults,
-      schema: Fixtures.schema
+      defaults: Fixtures.defaults (),
+      schema: Fixtures.schema ()
     };
 
   },
-  get defaults () {
+  defaults () {
     return {
       core: {
         foo: 'defaults',
@@ -45,7 +45,7 @@ const Fixtures = {
       undefined: undefined
     };
   },
-  get schema () {
+  schema () {
     return {
       type: 'object',
       properties: {
@@ -78,7 +78,7 @@ const Fixtures = {
       }
     };
   },
-  get local () {
+  local () {
     return {
       data: {
         core: {
@@ -88,7 +88,7 @@ const Fixtures = {
       }
     };
   },
-  get global () {
+  global () {
     return {
       data: {
         core: {

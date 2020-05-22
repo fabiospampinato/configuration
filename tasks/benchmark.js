@@ -16,8 +16,8 @@ function getConf ( validator ) {
       new ProviderMemory ({ scope: 'local' }),
       new ProviderMemory ({ scope: 'global' })
     ],
-    defaults: Fixtures.defaults,
-    schema: Fixtures.schema,
+    defaults: Fixtures.defaults (),
+    schema: Fixtures.schema (),
     validator
   });
 }
@@ -57,8 +57,8 @@ benchmark.group ( 'constructor', () => {
         providers: [
           new ProviderMemory ({ scope: 'foo' })
         ],
-        defaults: Fixtures.defaults,
-        schema: Fixtures.schema
+        defaults: Fixtures.defaults (),
+        schema: Fixtures.schema ()
       });
     }
   });
@@ -67,7 +67,7 @@ benchmark.group ( 'constructor', () => {
     name: 'json',
     iterations: 1,
     fn: ctx => {
-      ctx.conf = new Configuration ( Fixtures.options );
+      ctx.conf = new Configuration ( Fixtures.options () );
     }
   });
 

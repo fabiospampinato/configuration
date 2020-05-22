@@ -21,7 +21,7 @@ describe ( 'Configuration', () => {
 
     it ( 'initializes the instance', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.is ( conf.scope, 'global' );
       t.is ( conf.scopes.local, conf.providers[0] );
@@ -33,7 +33,7 @@ describe ( 'Configuration', () => {
 
     it ( 'adds a defaults provider', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.true ( !!conf.scopes.defaults );
 
@@ -71,7 +71,7 @@ describe ( 'Configuration', () => {
 
     it ( 'disposes all providers', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.dispose ();
 
@@ -87,7 +87,7 @@ describe ( 'Configuration', () => {
 
     it ( 'adds a namespace', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.extend ( 'ext.test', {
         defaults: {
@@ -122,7 +122,7 @@ describe ( 'Configuration', () => {
 
     it ( 'returns a disposer which removes the namespace', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       const disposer = conf.extend ( 'ext.test', {
         defaults: {
@@ -158,7 +158,7 @@ describe ( 'Configuration', () => {
 
     it ( 'supports flattened objects', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.extend ( 'flattened', {
         defaults: {
@@ -185,7 +185,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws an error if the namespace is already in use', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.extend ( 'core', {} );
@@ -195,7 +195,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws an error if the schema is missing when validation is enabled', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.extend ( 'ext.test', {} );
@@ -205,7 +205,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws an error if the schema is invalid', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.extend ( 'ext.test', { defaults: {}, schema: { type: 'invalid' } } );
@@ -215,7 +215,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws an error if the schema would be incompatible with existing types', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.extend ( 'ext.test', { defaults: {}, schema: { type: 'boolean' } } );
@@ -230,7 +230,7 @@ describe ( 'Configuration', () => {
 
     it ( 'updates the current data', t => {
 
-      const conf = new Configuration ( Fixtures.options ),
+      const conf = new Configuration ( Fixtures.options () ),
             dataPrev = _.cloneDeep ( conf.get () );
 
       conf.scopes.global.dataSchema = {};
@@ -246,7 +246,7 @@ describe ( 'Configuration', () => {
 
     it ( 'doesn\'t mutate each provider data', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.scopes.global.dataSchema.core.test = true;
 
@@ -272,7 +272,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can be disabled', t => {
 
-      const conf = new Configuration ({ ...Fixtures.options, schema: false });
+      const conf = new Configuration ({ ...Fixtures.options (), schema: false });
 
       t.is ( conf.validator, undefined );
 
@@ -280,7 +280,7 @@ describe ( 'Configuration', () => {
 
     it ( 'removes extra properties', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.is ( conf.get ( 'extra' ), undefined );
 
@@ -288,7 +288,7 @@ describe ( 'Configuration', () => {
 
     it ( 'removes invalid properties', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.is ( conf.get ( 'core.test' ), undefined );
 
@@ -296,7 +296,7 @@ describe ( 'Configuration', () => {
 
     it ( 'doesn\'t mutate the original object', t => {
 
-      const conf = new Configuration ( Fixtures.options ),
+      const conf = new Configuration ( Fixtures.options () ),
             data = { extra: 'extra' };
 
       const validated = conf.validate ( data );
@@ -313,7 +313,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can return the entire data', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.is ( conf.get (), conf.dataSchema );
 
@@ -321,7 +321,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can return all scopes data', t => {
 
-      const conf = new Configuration ( Fixtures.options ),
+      const conf = new Configuration ( Fixtures.options () ),
             datas = conf.get ( '*' );
 
       conf.providers.forEach ( ( provider, index ) => {
@@ -332,7 +332,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can query all scopes', t => {
 
-      const conf = new Configuration ( Fixtures.options ),
+      const conf = new Configuration ( Fixtures.options () ),
             datas = conf.get ( '*', 'core.baz' );
 
       t.is ( datas.defaults, 'defaults' );
@@ -343,7 +343,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can query a scope', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.is ( conf.get ( 'defaults', 'core.baz' ), 'defaults' );
       t.is ( conf.get ( 'local', 'core.baz' ), 'local' );
@@ -353,7 +353,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can query the entire data', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.is ( conf.get ( 'core.foo' ), 'local' );
       t.is ( conf.get ( 'core.bar' ), 'global' );
@@ -365,7 +365,7 @@ describe ( 'Configuration', () => {
 
     it ( 'supports flattened objects', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.is ( conf.get ( 'core.flattened' ), true );
 
@@ -373,7 +373,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws for non-existent scopes', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.get ( 'missing', 'foo' );
@@ -387,7 +387,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can check all scopes data', t => {
 
-      const conf = new Configuration ( Fixtures.options ),
+      const conf = new Configuration ( Fixtures.options () ),
             datas = conf.has ( '*', 'core.baz' );
 
       t.true ( datas.defaults );
@@ -398,7 +398,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can check a scope', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.true ( conf.has ( 'defaults', 'core.baz' ) );
       t.true ( conf.has ( 'local', 'core.baz' ) );
@@ -408,7 +408,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can check the entire data', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.true ( conf.has ( 'core.foo' ) );
       t.true ( conf.has ( 'core.bar' ) );
@@ -420,7 +420,7 @@ describe ( 'Configuration', () => {
 
     it ( 'supports undefined', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.dataSchema.none = undefined;
 
@@ -430,7 +430,7 @@ describe ( 'Configuration', () => {
 
     it ( 'supports flattened objects', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.true ( conf.has ( 'core.flattened' ) );
 
@@ -438,7 +438,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws for non-existent scopes', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.has ( 'missing', 'foo' );
@@ -452,7 +452,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can set in all scopes except defaults', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.set ( '*', 'core.test', 123 );
 
@@ -466,7 +466,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can set in a scope', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.set ( 'global', 'core.test', 0 );
 
@@ -482,7 +482,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can set in the default scope', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.set ( 'core.test', 0 );
 
@@ -494,7 +494,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can set in the first appropriate scope', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.set ( 'core.foo', 'test' );
 
@@ -518,7 +518,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws when trying to change defaults', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.set ( 'defaults', 'core.test', 0 );
@@ -528,7 +528,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws for non-existent scopes', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.set ( 'missing', 'foo', 0 );
@@ -542,7 +542,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can remove in all scopes except defaults', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.remove ( '*', 'core.bar' );
 
@@ -556,7 +556,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can remove in a scope', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.remove ( 'global', 'core.foo' );
 
@@ -572,7 +572,7 @@ describe ( 'Configuration', () => {
 
     it ( 'will remove in all scopes by default', async t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.remove ( 'core.foo' );
 
@@ -596,7 +596,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws when trying to change defaults', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.remove ( 'defaults', 'core.test' );
@@ -606,7 +606,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws for non-existent scopes', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.remove ( 'missing', 'foo' );
@@ -620,7 +620,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can update all scopes except defaults', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.update ( '*', {} );
 
@@ -634,7 +634,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can update a scope', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.update ( 'global', {} );
 
@@ -644,7 +644,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can update the default scope', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.update ( {} );
 
@@ -654,7 +654,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can update via a string', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.update ( '{}' );
 
@@ -664,7 +664,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can update via an object', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.update ({});
 
@@ -674,7 +674,7 @@ describe ( 'Configuration', () => {
 
     it ( 'supports flattened objects', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.update ( 'local', {
         'core.foo': 'foo',
@@ -689,7 +689,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws when trying to change defaults', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.update ( 'defaults', {} );
@@ -699,7 +699,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws for non-existent scopes', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.update ( 'missing', {} );
@@ -713,7 +713,7 @@ describe ( 'Configuration', () => {
 
     it ( 'will reset all scopes except defaults by default', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.reset ();
 
@@ -727,7 +727,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can reset all scopes except defaults', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.reset ( '*' );
 
@@ -741,7 +741,7 @@ describe ( 'Configuration', () => {
 
     it ( 'can reset a scope', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.reset ( 'global' );
 
@@ -755,7 +755,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws when trying to change defaults', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.reset ( 'defaults' );
@@ -765,7 +765,7 @@ describe ( 'Configuration', () => {
 
     it ( 'throws for non-existent scopes', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       t.throws ( () => {
         conf.reset ( 'missing' );
@@ -781,7 +781,7 @@ describe ( 'Configuration', () => {
 
       let tests = 0;
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       conf.onChange ( 'global', 'core.foo', ( curr, prev ) => {
         tests++;
@@ -812,7 +812,7 @@ describe ( 'Configuration', () => {
 
     it ( 'returns a disposer', t => {
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       const disposer = conf.onChange ( 'core.foo', t.fail );
 
@@ -839,8 +839,8 @@ describe ( 'Configuration', () => {
 
       const options = {
         providers: [foo],
-        defaults: Fixtures.defaults,
-        schema: Fixtures.schema
+        defaults: Fixtures.defaults (),
+        schema: Fixtures.schema ()
       };
 
       const conf = new Configuration ( options );
@@ -850,7 +850,7 @@ describe ( 'Configuration', () => {
 
       t.is ( conf.get ( 'core.foo' ), 'defaults' );
 
-      foo.writeSync ( Fixtures.local.data );
+      foo.writeSync ( Fixtures.local ().data );
 
       t.is ( conf.get ( 'core.foo' ), 'local' );
 
@@ -891,12 +891,12 @@ describe ( 'Configuration', () => {
         watch: false
       });
 
-      foo.writeSync ( Fixtures.local.data );
+      foo.writeSync ( Fixtures.local ().data );
 
       const options = {
         providers: [foo],
-        defaults: Fixtures.defaults,
-        schema: Fixtures.schema
+        defaults: Fixtures.defaults (),
+        schema: Fixtures.schema ()
       };
 
       const conf = new Configuration ( options );
@@ -908,7 +908,7 @@ describe ( 'Configuration', () => {
 
     it.skip ( 'detects when a file gets updated', async t => { //FIXME: Not watching properly //FIXME: It blows up the heap for some reason
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       await new Promise ( resolve => conf.scopes.global.listener.on ( 'ready', resolve ) );
 
@@ -928,7 +928,7 @@ describe ( 'Configuration', () => {
 
     it.skip ( 'handles invalid data', async t => { //FIXME: Not watching properly //FIXME: It blows up the heap for some reason
 
-      const conf = new Configuration ( Fixtures.options );
+      const conf = new Configuration ( Fixtures.options () );
 
       await new Promise ( resolve => conf.scopes.global.listener.on ( 'ready', resolve ) );
 
