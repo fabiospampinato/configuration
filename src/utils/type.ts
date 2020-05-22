@@ -14,6 +14,12 @@ const Type = {
 
   },
 
+  isArray ( x: any ): x is any[] {
+
+    return Array.isArray ( x );
+
+  },
+
   isObject ( x: any ): x is ValueArray | ValueObject {
 
     return !isPrimitive ( x );

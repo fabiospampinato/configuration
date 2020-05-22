@@ -40,7 +40,7 @@ class Configuration {
     this.scope = options.scope ?? this.providers[this.providers.length - 1].scope;
     this.handlers = [];
 
-    this.isArray = Array.isArray ( options.defaults );
+    this.isArray = Type.isArray ( options.defaults );
 
     this.defaults = new ProviderMemory ({ scope: SCOPE_DEFAULTS });
     this.defaults.writeSync ( options.defaults ? pp.unflat ( options.defaults ) : {}, true );
@@ -192,7 +192,7 @@ class Configuration {
   refresh (): void {
 
     const datas = this.providers.map ( provider => provider.dataSchema ).reverse (),
-          datasFiltered = datas.filter ( data => Array.isArray ( data ) === this.isArray );
+          datasFiltered = datas.filter ( data => Type.isArray ( data ) === this.isArray );
 
     this.dataSchema = this.isArray ? Array.prototype.concat ( ...datasFiltered ) : merge ( datasFiltered );
 
@@ -208,7 +208,7 @@ class Configuration {
 
     this.validator ( clone );
 
-    if ( Array.isArray ( clone ) ) return clone.filter ( x => !Type.isUndefined ( x ) );
+    if ( Type.isArray ( clone ) ) return clone.filter ( x => !Type.isUndefined ( x ) );
 
     return clone;
 
