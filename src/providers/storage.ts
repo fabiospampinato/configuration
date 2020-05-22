@@ -30,7 +30,7 @@ class ProviderStorage<Options extends ProviderStorageOptions = ProviderStorageOp
 
     if ( !this.storage ) return super.readSync ();
 
-    const dataRaw = this.storage.getItem ( this.id ) || DEFAULTS.dataRaw,
+    const dataRaw = this.storage.getItem ( this.id ) ?? DEFAULTS.dataRaw,
           data = Serializer.deserialize ( dataRaw );
 
     return {data, dataRaw};

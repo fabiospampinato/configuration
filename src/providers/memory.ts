@@ -19,8 +19,8 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
   readSync (): DataUpdate {
 
-    const data = this.data || DEFAULTS.data,
-          dataRaw = this.dataRaw || DEFAULTS.dataRaw;
+    const data = this.data ?? DEFAULTS.data,
+          dataRaw = this.dataRaw ?? DEFAULTS.dataRaw;
 
     return {data, dataRaw};
 

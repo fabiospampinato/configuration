@@ -17,7 +17,7 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
     try {
 
-      const dataRaw = await File.read ( this.path, { encoding: 'utf8' } ) || DEFAULTS.dataRaw,
+      const dataRaw = await File.read ( this.path, { encoding: 'utf8' } ) ?? DEFAULTS.dataRaw,
             data = Serializer.deserialize ( dataRaw );
 
       return {data, dataRaw};
@@ -38,7 +38,7 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
     try {
 
-      const dataRaw = File.readSync ( this.path, { encoding: 'utf8' } ) || DEFAULTS.dataRaw,
+      const dataRaw = File.readSync ( this.path, { encoding: 'utf8' } ) ?? DEFAULTS.dataRaw,
             data = Serializer.deserialize ( dataRaw );
 
       return {data, dataRaw};

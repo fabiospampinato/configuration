@@ -945,6 +945,24 @@ describe ( 'Configuration', () => {
 
     });
 
+    it ( 'preserves empty contents', async t => {
+
+      const conf = new Configuration ( Fixtures.options ( true ) );
+
+      // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
+
+      await delay ( 1000 );
+
+      fs.writeFileSync ( conf.scopes.global.path, '' );
+
+      await delay ( 1500 );
+
+      t.is ( conf.get ( 'core.bar' ), 'defaults' );
+      t.is ( conf.get ( 'core.test' ), undefined );
+      t.is ( conf.scopes.global.dataRaw, '' );
+
+    });
+
     it ( 'preserves the formatting in the new string', async t => {
 
       const conf = new Configuration ( Fixtures.options ( true ) );
