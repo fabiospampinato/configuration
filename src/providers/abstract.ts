@@ -16,6 +16,8 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
   dataRaw: DataRaw;
   dataSchema: Data;
   dataParser: DataParser;
+  defaults: Data;
+  defaultsRaw: DataRaw;
   handlers: ProviderChangeHandler[];
 
   constructor ( options?: Partial<Options> ) {
@@ -24,6 +26,8 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
 
     this.scope = options?.scope ?? DEFAULTS.scope;
     this.dataParser = options?.parser ?? new Parser ( options?.indentation ?? DEFAULTS.indentation );
+    this.defaults = options?.defaults ?? DEFAULTS.defaults;
+    this.defaultsRaw = options?.defaultsRaw ?? DEFAULTS.defaultsRaw;
     this.handlers = [];
 
     this.init ();

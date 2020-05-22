@@ -47,6 +47,24 @@ describe ( 'Configuration', () => {
 
     });
 
+    it ( 'supports custom defaults', t => {
+
+      const conf = new Configuration ( Fixtures.options ({ defaults: { core: { bar: 'custom' } }, defaultsRaw: '{ // Custom }' }) );
+
+      t.is ( conf.get ( 'global', 'core.bar' ), 'global' );
+
+      conf.scopes.global.writeSync ( '{' ); // Unparseable data raw, forcing the use of defaults
+
+      t.is ( conf.get ( 'global', 'core.bar' ), 'custom' );
+      t.is ( conf.scopes.global.dataRaw, '{' );
+
+      conf.scopes.global.writeSync ({ toJSON: () => { throw new Error ( 'Unstringifiable') } }); // Unstringifiable data, forcing the use of defaults
+
+      t.is ( conf.get ( 'global', 'core.bar' ), undefined );
+      t.is ( conf.scopes.global.dataRaw, '{ // Custom }' );
+
+    });
+
     it ( 'throws if no providers are passed', t => {
 
       t.throws ( () => {

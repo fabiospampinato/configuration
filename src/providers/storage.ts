@@ -1,6 +1,7 @@
 
 /* IMPORT */
 
+import cloneDeep from 'plain-object-clone';
 import {Data, DataRaw, DataUpdate, ProviderStorageOptions} from '../types';
 import {DEFAULTS} from '../config';
 import ProviderMemory from './memory';
@@ -29,8 +30,8 @@ class ProviderStorage<Options extends ProviderStorageOptions = ProviderStorageOp
 
     if ( !this.storage ) return super.readSync ();
 
-    const dataRaw = this.storage.getItem ( this.id ) ?? DEFAULTS.dataRaw,
-          data = this.dataParser.parse ( dataRaw );
+    const dataRaw = this.storage.getItem ( this.id ) ?? this.defaultsRaw,
+          data = this.dataParser.parse ( dataRaw ) ?? cloneDeep ( this.defaults );
 
     return {data, dataRaw};
 

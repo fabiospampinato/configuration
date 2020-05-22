@@ -5,10 +5,8 @@ const DEFAULTS = {
   id: 'confId',
   scope: 'provider',
   indentation: 2,
-  dataRaw: '{\n  \n}',
-  get data () {
-    return {};
-  }
+  defaults: {},
+  defaultsRaw: '{\n  \n}'
 };
 
 const SCOPE_ALL = '*';

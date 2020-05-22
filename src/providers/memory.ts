@@ -1,8 +1,8 @@
 
 /* IMPORT */
 
+import cloneDeep from 'plain-object-clone';
 import {Data, DataRaw, DataUpdate, ProviderMemoryOptions} from '../types';
-import {DEFAULTS} from '../config';
 import Type from '../utils/type';
 import ProviderAbstract from './abstract';
 
@@ -18,8 +18,8 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
   readSync (): DataUpdate {
 
-    const data = this.data ?? DEFAULTS.data,
-          dataRaw = this.dataRaw ?? DEFAULTS.dataRaw;
+    const data = this.data ?? cloneDeep ( this.defaults ),
+          dataRaw = this.dataRaw ?? this.defaultsRaw;
 
     return {data, dataRaw};
 
@@ -37,14 +37,14 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
     if ( Type.isString ( data ) ) {
 
-      this.data = this.dataParser.parse ( data );
+      this.data = this.dataParser.parse ( data ) ?? cloneDeep ( this.defaults );
       this.dataRaw = data;
       this.dataSchema = this.validate ( this.data );
 
     } else {
 
       this.data = data;
-      this.dataRaw = this.dataParser.stringify ( this.data );
+      this.dataRaw = this.dataParser.stringify ( this.data ) ?? this.defaultsRaw;
       this.dataSchema = this.validate ( this.data );
 
     }

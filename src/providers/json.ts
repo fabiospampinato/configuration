@@ -1,8 +1,8 @@
 
 /* IMPORT */
 
+import cloneDeep from 'plain-object-clone';
 import {Data, DataRaw, DataUpdate, ProviderJSONOptions} from '../types';
-import {DEFAULTS} from '../config';
 import File from '../utils/file';
 import ProviderFile from './file';
 
@@ -16,16 +16,17 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
     try {
 
-      const dataRaw = await File.read ( this.path, { encoding: 'utf8' } ) ?? DEFAULTS.dataRaw,
-            data = this.dataParser.parse ( dataRaw );
+      const dataRaw = await File.read ( this.path, { encoding: 'utf8' } ) ?? this.defaultsRaw,
+            data = this.dataParser.parse ( dataRaw ) ?? cloneDeep ( this.defaults );
 
       return {data, dataRaw};
 
     } catch {
 
-      const {data, dataRaw} = DEFAULTS;
-
-      return {data, dataRaw};
+      return {
+        data: cloneDeep ( this.defaults ),
+        dataRaw: this.defaultsRaw
+      };
 
     }
 
@@ -37,16 +38,17 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
     try {
 
-      const dataRaw = File.readSync ( this.path, { encoding: 'utf8' } ) ?? DEFAULTS.dataRaw,
-            data = this.dataParser.parse ( dataRaw );
+      const dataRaw = File.readSync ( this.path, { encoding: 'utf8' } ) ?? this.defaultsRaw,
+            data = this.dataParser.parse ( dataRaw ) ?? cloneDeep ( this.defaults );
 
       return {data, dataRaw};
 
     } catch {
 
-      const {data, dataRaw} = DEFAULTS;
-
-      return {data, dataRaw};
+      return {
+        data: cloneDeep ( this.defaults ),
+        dataRaw: this.defaultsRaw
+      };
 
     }
 

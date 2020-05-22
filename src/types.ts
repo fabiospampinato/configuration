@@ -23,8 +23,8 @@ type DataUpdate = {
 };
 
 type DataParser = {
-  parse: ( raw: DataRaw ) => Data,
-  stringify: ( data: Data ) => DataRaw
+  parse: ( raw: DataRaw ) => Data | undefined,
+  stringify: ( data: Data ) => DataRaw | undefined
 };
 
 type Value = ValuePrimitive | ValueArray | ValueObject;
@@ -64,6 +64,8 @@ type ProviderChangeHandler = () => void;
 
 type ProviderAbstractOptions = {
   scope: string,
+  defaults?: Data,
+  defaultsRaw?: DataRaw,
   indentation?: string | number,
   parser?: DataParser
 };
