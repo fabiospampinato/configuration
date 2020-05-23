@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "ajv": "^6.12.2",
-    "ajv-filter": "^1.1.0",
+    "ajv-filter": "^1.1.1",
     "chokidar-watcher": "^1.4.1",
     "graceful-fs": "^4.2.4",
     "is-primitive": "^3.0.1",
