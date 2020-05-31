@@ -28,7 +28,7 @@ type DataParser = {
 };
 
 type Value = ValuePrimitive | ValueArray | ValueObject;
-type ValuePrimitive = null | boolean | number | string;
+type ValuePrimitive = null | undefined | boolean | number | string;
 type ValueArray = Array<Value>;
 type ValueObject = { [key: string]: Value };
 
