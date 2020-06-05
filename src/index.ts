@@ -43,7 +43,7 @@ class Configuration {
     this.isArray = Type.isArray ( options.defaults );
 
     this.defaults = new ProviderMemory ({ scope: SCOPE_DEFAULTS });
-    this.defaults.writeSync ( options.defaults ? pp.unflat ( options.defaults ) : {}, true );
+    this.defaults.writeSync ( options.defaults || {}, true );
 
     if ( options.validator ) {
 
@@ -96,7 +96,6 @@ class Configuration {
       const provider = this.providers[i];
 
       provider.validate = this.validate.bind ( this );
-      provider.data = pp.unflat ( provider.data );
       provider.dataSchema = provider.validate ( provider.data );
       provider.onChange ( this.refresh.bind ( this ) );
 
@@ -378,15 +377,13 @@ class Configuration {
 
     if ( !Type.isString ( scope ) ) return; //TSC
 
-    const dataUnflattened = Type.isString ( data ) ? data : pp.unflat ( data );
-
     if ( scope === SCOPE_ALL ) { // All
 
       for ( let scope in this.scopes ) {
 
         if ( scope === SCOPE_DEFAULTS ) continue;
 
-        this.scopes[scope].write ( dataUnflattened );
+        this.scopes[scope].write ( data );
 
       }
 
@@ -398,7 +395,7 @@ class Configuration {
 
       if ( !provider ) throw new Error ( 'You can\'t update unknown scopes' );
 
-      provider.write ( dataUnflattened );
+      provider.write ( data );
 
     }
 

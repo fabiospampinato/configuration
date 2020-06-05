@@ -2,6 +2,7 @@
 /* IMPORT */
 
 import isEqual from 'plain-object-is-equal';
+import pp from 'path-prop';
 import {Disposer, Data, DataRaw, DataUpdate, DataParser, ProviderChangeHandler, ProviderAbstractOptions} from '../types';
 import {DEFAULTS, SCOPE_ALL} from '../config';
 import Parser from '../utils/parser';
@@ -26,8 +27,8 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
 
     this.scope = options?.scope ?? DEFAULTS.scope;
     this.dataParser = options?.parser ?? new Parser ( options?.indentation ?? DEFAULTS.indentation );
-    this.defaults = options?.defaults ?? DEFAULTS.defaults;
     this.defaultsRaw = options?.defaultsRaw ?? DEFAULTS.defaultsRaw;
+    this.defaults = pp.unflat ( options?.defaults ?? ( this.dataParser.parse ( this.defaultsRaw ) || DEFAULTS.defaults ) );
     this.handlers = [];
 
     this.init ();

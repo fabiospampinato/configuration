@@ -2,6 +2,7 @@
 /* IMPORT */
 
 import cloneDeep from 'plain-object-clone';
+import pp from 'path-prop';
 import {Data, DataRaw, DataUpdate, ProviderJSONOptions} from '../types';
 import File from '../utils/file';
 import ProviderFile from './file';
@@ -17,7 +18,7 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
     try {
 
       const dataRaw = await File.read ( this.path, { encoding: 'utf8' } ) ?? this.defaultsRaw,
-            data = this.dataParser.parse ( dataRaw ) ?? cloneDeep ( this.defaults );
+            data = pp.unflat ( this.dataParser.parse ( dataRaw ) ?? this.defaults );
 
       return {data, dataRaw};
 
@@ -39,7 +40,7 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
     try {
 
       const dataRaw = File.readSync ( this.path, { encoding: 'utf8' } ) ?? this.defaultsRaw,
-            data = this.dataParser.parse ( dataRaw ) ?? cloneDeep ( this.defaults );
+            data = pp.unflat ( this.dataParser.parse ( dataRaw ) ?? this.defaults );
 
       return {data, dataRaw};
 

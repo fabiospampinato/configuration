@@ -2,6 +2,7 @@
 /* IMPORT */
 
 import cloneDeep from 'plain-object-clone';
+import pp from 'path-prop';
 import {Data, DataRaw, DataUpdate, ProviderMemoryOptions} from '../types';
 import Type from '../utils/type';
 import ProviderAbstract from './abstract';
@@ -37,14 +38,14 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
     if ( Type.isString ( data ) ) {
 
-      this.data = this.dataParser.parse ( data ) ?? cloneDeep ( this.defaults );
+      this.data = pp.unflat ( this.dataParser.parse ( data ) ?? this.defaults );
       this.dataRaw = data;
       this.dataSchema = this.validate ( this.data );
 
     } else {
 
-      this.data = data;
-      this.dataRaw = this.dataParser.stringify ( this.data ) ?? this.defaultsRaw;
+      this.data = pp.unflat ( data );
+      this.dataRaw = this.dataParser.stringify ( data ) ?? this.defaultsRaw;
       this.dataSchema = this.validate ( this.data );
 
     }

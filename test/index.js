@@ -66,6 +66,30 @@ describe ( 'Configuration', () => {
 
     });
 
+    it ( 'supports custom flattened defaults (scope)', t => {
+
+      const conf = new Configuration ({ providers: [new ProviderMemory ()], defaults: { 'core.bar': 'custom' } });
+
+      t.true ( _.isEqual ( conf.scopes.defaults.data, { core: { bar: 'custom' } } ) );
+
+    });
+
+    it ( 'supports custom flattened defaults (provider+object)', t => {
+
+      const conf = new Configuration ({ providers: [new ProviderMemory ({ defaults: { 'core.foo': 'custom' } })] });
+
+      t.true ( _.isEqual ( conf.scopes.provider.data, { core: { foo: 'custom' } } ) );
+
+    });
+
+    it ( 'supports custom flattened defaults (provider+string)', t => {
+
+      const conf = new Configuration ({ providers: [new ProviderMemory ({ defaultsRaw: `{ "core.foo": "custom" }` })] });
+
+      t.true ( _.isEqual ( conf.scopes.provider.data, { core: { foo: 'custom' } } ) );
+
+    });
+
     it ( 'throws if no providers are passed', t => {
 
       t.throws ( () => {
@@ -715,7 +739,7 @@ describe ( 'Configuration', () => {
 
     });
 
-    it ( 'supports flattened objects', t => {
+    it ( 'supports flattened objects (object)', t => {
 
       const conf = new Configuration ( Fixtures.options () );
 
@@ -723,6 +747,21 @@ describe ( 'Configuration', () => {
         'core.foo': 'foo',
         'core.bar': 'bar'
       });
+
+      t.is ( conf.get ( 'core.foo' ), 'foo' );
+      t.is ( conf.get ( 'core.bar' ), 'bar' );
+      t.is ( conf.get ( 'core.baz' ), 'defaults' );
+
+    });
+
+    it ( 'supports flattened objects (string)', t => {
+
+      const conf = new Configuration ( Fixtures.options () );
+
+      conf.update ( 'local', `{
+        "core.foo": "foo",
+        "core.bar": "bar"
+      }`);
 
       t.is ( conf.get ( 'core.foo' ), 'foo' );
       t.is ( conf.get ( 'core.bar' ), 'bar' );
@@ -1050,6 +1089,27 @@ describe ( 'Configuration', () => {
       t.is ( conf.get ( 'core.bar' ), 'custom' );
       t.is ( conf.get ( 'core.test' ), undefined );
       t.is ( conf.scopes.global.dataRaw, dataNext );
+
+    });
+
+    it ( 'supports flattened objects (string)', async t => {
+
+      const conf = new Configuration ( Fixtures.options ({ watch: true }) );
+
+      // await new Promise ( resolve => conf.scopes.local.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
+
+      await delay ( 1000 );
+
+      fs.writeFileSync ( conf.scopes.local.path, `{
+        "core.foo": "foo",
+        "core.bar": "bar"
+      }`);
+
+      await delay ( 1500 );
+
+      t.is ( conf.get ( 'core.foo' ), 'foo' );
+      t.is ( conf.get ( 'core.bar' ), 'bar' );
+      t.is ( conf.get ( 'core.baz' ), 'defaults' );
 
     });
 
