@@ -63,7 +63,7 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
     await super.write ( data, true );
 
-    File.write ( this.path, this.dataRaw );
+    File.write ( this.path, this.dataRaw, this.writeOptions );
 
   }
 
@@ -75,7 +75,7 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
     super.writeSync ( data, true );
 
-    File.writeSync ( this.path, this.dataRaw );
+    File.writeSync ( this.path, this.dataRaw, this.writeSyncOptions );
 
   }
 

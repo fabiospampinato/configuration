@@ -1,6 +1,7 @@
 
 /* IMPORT */
 
+import {WriteOptions} from 'atomically/dist/types';
 import {FSWatcher} from 'chokidar';
 import {ProviderFileOptions} from '../types';
 import File from '../utils/file';
@@ -13,12 +14,16 @@ class ProviderFile<Options extends ProviderFileOptions = ProviderFileOptions> ex
   path?: string;
   watching: boolean;
   watcher?: FSWatcher;
+  writeOptions?: WriteOptions;
+  writeSyncOptions?: WriteOptions;
 
   constructor ( options: Partial<Options> ) {
 
     super ( options );
 
     this.watching = !!options.watch;
+    this.writeOptions = options.writeOptions;
+    this.writeSyncOptions = options.writeSyncOptions;
 
     this.swap ( options.path, true );
 

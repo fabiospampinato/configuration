@@ -1,6 +1,7 @@
 
 /* IMPORT */
 
+import {WriteOptions} from 'atomically/dist/types';
 import {ValidateFunction} from 'ajv';
 import {JSONSchema7} from 'json-schema';
 
@@ -72,7 +73,9 @@ type ProviderAbstractOptions = {
 
 type ProviderFileOptions = ProviderAbstractOptions & {
   path: string,
-  watch?: boolean
+  watch?: boolean,
+  writeOptions?: WriteOptions,
+  writeSyncOptions?: WriteOptions
 };
 
 type ProviderJSONOptions = ProviderFileOptions;
