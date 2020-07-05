@@ -45,7 +45,11 @@ class ProviderStorage<Options extends ProviderStorageOptions = ProviderStorageOp
 
     super.writeSync ( data, true );
 
-    this.storage.setItem ( this.id, this.dataRaw );
+    try {
+
+      this.storage.setItem ( this.id, this.dataRaw );
+
+    } catch {}
 
   }
 
