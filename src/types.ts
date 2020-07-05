@@ -72,7 +72,7 @@ type ProviderAbstractOptions = {
 };
 
 type ProviderFileOptions = ProviderAbstractOptions & {
-  path: string,
+  path?: string,
   watch?: boolean,
   writeOptions?: WriteOptions,
   writeSyncOptions?: WriteOptions
