@@ -41,13 +41,13 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
 
     this.data = data;
     this.dataRaw = dataRaw;
-    this.dataSchema = this.validate ( this.data );
+    this.dataSchema = this.filterer ( this.data );
 
   }
 
   dispose (): void {}
 
-  validate ( data: Data ): Data {
+  filterer ( data: Data ): Data {
 
     return data;
 

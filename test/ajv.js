@@ -1,16 +1,16 @@
 
 /* IMPORT */
 
-import {Ajv, ValidateFunction} from 'ajv';
-import {JSONSchema7} from 'json-schema';
+const _ = require ( 'lodash' );
+const { clone } = require('lodash');
 
 /* AJV */
 
 const AJV = {
 
-  instance: undefined as Ajv | undefined, // Caching instance
+  instance: undefined, // Caching instance
 
-  getInstance (): Ajv {
+  getInstance () {
 
     if ( AJV.instance ) return AJV.instance;
 
@@ -36,7 +36,7 @@ const AJV = {
 
   },
 
-  getSchema ( schema: JSONSchema7 ): JSONSchema7 {
+  getSchema ( schema ) {
 
     const Filter = require ( 'ajv-filter' ); // Lazy import for performance
 
@@ -44,7 +44,7 @@ const AJV = {
 
   },
 
-  validateSchema ( schema: JSONSchema7 ): boolean {
+  validateSchema ( schema ) {
 
     const ajv = AJV.getInstance ();
 
@@ -52,11 +52,27 @@ const AJV = {
 
   },
 
-  getValidator ( schema: JSONSchema7 ): ValidateFunction {
+  getValidator ( schema ) {
 
     const ajv = AJV.getInstance ();
 
     return ajv.compile ( schema );
+
+  },
+
+  filterer ( data, schema ) {
+
+    const clone = _.cloneDeep ( data );
+
+    if ( !schema ) return clone;
+
+    const validator = AJV.getValidator ( AJV.getSchema ( schema ) );
+
+    validator ( clone );
+
+    if ( Array.isArray ( clone ) ) return clone.filter ( x => x !== undefined );
+
+    return clone;
 
   }
 
@@ -64,4 +80,4 @@ const AJV = {
 
 /* EXPORT */
 
-export default AJV;
+module.exports = AJV;

@@ -2,7 +2,8 @@
 /* IMPORT */
 
 const tempy = require ( 'tempy' ),
-      {default: ProviderJSON} = require ( '../dist/providers/json' );
+      {default: ProviderJSON} = require ( '../dist/providers/json' ),
+      AJV = require ( './ajv' );
 
 /* FIXTURES */
 
@@ -26,7 +27,8 @@ const Fixtures = {
     return {
       providers: [local, global],
       defaults: Fixtures.defaults (),
-      schema: Fixtures.schema ()
+      schema: Fixtures.schema (),
+      filterer: AJV.filterer
     };
 
   },
@@ -124,7 +126,8 @@ const FixturesArray = {
     return {
       providers: [local, global],
       defaults: FixturesArray.defaults (),
-      schema: FixturesArray.schema ()
+      schema: FixturesArray.schema (),
+      filterer: AJV.filterer
     };
 
   },

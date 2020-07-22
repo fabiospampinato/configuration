@@ -2,7 +2,6 @@
 /* IMPORT */
 
 import {WriteOptions} from 'atomically/dist/types';
-import {ValidateFunction} from 'ajv';
 import {JSONSchema7} from 'json-schema';
 
 /* TYPES */
@@ -35,6 +34,10 @@ type ValueObject = { [key: string]: Value };
 
 type Schema = JSONSchema7;
 
+type Filterer = ( value: Data, schema?: Schema ) => Data;
+
+type FiltererWrapper = ( value: Data ) => Data;
+
 type ExtendData = {
   defaults?: Data,
   schema?: Schema
@@ -53,7 +56,7 @@ type Options = {
   providers: Provider[],
   defaults: Data,
   schema: Schema,
-  validator: ValidateFunction,
+  filterer: Filterer,
   scope: Scope
 };
 
@@ -89,4 +92,4 @@ type ProviderStorageOptions = ProviderAbstractOptions & {
 
 /* EXPORT */
 
-export {Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, ExtendData, Value, ValueArray, ValueObject, Schema, ChangeHandler, ChangeHandlerData, Disposer, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};
+export {Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, ExtendData, Value, ValueArray, ValueObject, Schema, Filterer, FiltererWrapper, ChangeHandler, ChangeHandlerData, Disposer, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};

@@ -1,16 +1,14 @@
 
 /* IMPORT */
 
-import {ValidateFunction} from 'ajv';
 import * as isPrimitive from 'is-primitive';
 import pp from 'path-prop';
 import cloneDeep from 'plain-object-clone';
 import isEqual from 'plain-object-is-equal';
 import merge from 'plain-object-merge';
-import {Scope, ScopeAll, Scopes, Path, Value, Data, DataRaw, Schema, ExtendData, Disposer, ChangeHandler, ChangeHandlerData, Options, Provider} from './types';
+import {Scope, ScopeAll, Scopes, Path, Value, Data, DataRaw, Schema, ExtendData, Disposer, ChangeHandler, ChangeHandlerData, Options, Provider, Filterer, FiltererWrapper} from './types';
 import {SCOPE_ALL, SCOPE_DEFAULTS} from './config';
 import ProviderMemory from './providers/memory';
-import AJV from './utils/ajv';
 import Type from './utils/type';
 
 /* CONFIGURATION */
@@ -24,14 +22,15 @@ class Configuration {
   defaults: Provider;
   isArray: boolean;
   schema?: Schema;
-  validator?: ValidateFunction;
+  filtererRaw: Filterer;
+  filterer: FiltererWrapper;
   scope: Scope;
   dataSchema: Data;
   handlers: ChangeHandlerData[];
 
   /* CONSTRUCTOR */
 
-  constructor ( options: Partial<Options> ) {
+  constructor ( options: Partial<Options> & Pick<Options, 'filterer'> ) {
 
     if ( !options.providers?.length ) throw new Error ( 'You need to pass at least one configuration provider' );
 
@@ -45,25 +44,9 @@ class Configuration {
     this.defaults = new ProviderMemory ({ scope: SCOPE_DEFAULTS });
     this.defaults.writeSync ( options.defaults || {}, true );
 
-    if ( options.validator ) {
-
-      this.validator = options.validator;
-
-    }
-
-    if ( options.schema ) {
-
-      const schema = AJV.getSchema ( options.schema );
-
-      this.schema = schema;
-
-      if ( !this.validator ) {
-
-        this.validator = AJV.getValidator ( schema );
-
-      }
-
-    }
+    this.schema = options.schema;
+    this.filtererRaw = options.filterer;
+    this.filterer = value => this.filtererRaw ( value, this.schema );
 
     this.init ();
 
@@ -95,8 +78,8 @@ class Configuration {
 
       const provider = this.providers[i];
 
-      provider.validate = this.validate.bind ( this );
-      provider.dataSchema = provider.validate ( provider.data );
+      provider.filterer = this.filterer;
+      provider.dataSchema = provider.filterer ( provider.data );
       provider.onChange ( this.refresh.bind ( this ) );
 
       this.scopes[provider.scope] = provider;
@@ -125,7 +108,7 @@ class Configuration {
 
     if ( this.schema && !data.schema ) throw new Error ( `You need to provide a schema for the "${namespace}" namespace` );
 
-    if ( data.schema && !AJV.validateSchema ( data.schema ) ) throw new Error ( `The provided schema for the "${namespace}" namespace is invalid` );
+    if ( data.schema ) throw new Error ( `The provided schema for the "${namespace}" namespace is invalid` ); //TODO: Actually validate schema
 
     if ( !data.defaults && !data.schema ) return () => {};
 
@@ -150,13 +133,11 @@ class Configuration {
 
       namespaceSchema += `${namespaceSchema ? '.' : ''}properties.${segments[segments.length - 1]}`;
 
-      schemaPatch = AJV.getSchema ( schemaPatch );
       schemaPatch = pp.set ( schemaPatch, namespaceSchema, data.schema );
 
       const schema = merge ([ this.schema, schemaPatch ]);
 
       this.schema = schema;
-      this.validator = AJV.getValidator ( schema );
 
     }
 
@@ -171,8 +152,6 @@ class Configuration {
       if ( this.schema && data.schema ) {
 
         pp.delete ( this.schema, namespaceSchema );
-
-        this.validator = AJV.getValidator ( this.schema );
 
       }
 
@@ -196,20 +175,6 @@ class Configuration {
     this.dataSchema = this.isArray ? Array.prototype.concat ( ...datasFiltered ) : merge ( datasFiltered );
 
     this.triggerChange ();
-
-  }
-
-  validate ( data: Data ): Data {
-
-    if ( !this.validator ) return data;
-
-    const clone = cloneDeep ( data );
-
-    this.validator ( clone );
-
-    if ( Type.isArray ( clone ) ) return clone.filter ( x => !Type.isUndefined ( x ) );
-
-    return clone;
 
   }
 

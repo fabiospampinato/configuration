@@ -4,13 +4,12 @@
 const {default: Configuration} = require ( '../dist' ),
       {default: ProviderMemory} = require ( '../dist/providers/memory' ),
       {Fixtures} = require ( '../test/fixtures' ),
+      AJV = require ( '../test/ajv' ),
       benchmark = require ( 'benchloop' );
 
 /* HELPERS */
 
-const {validator} = getConf ();
-
-function getConf ( validator ) {
+function getConf () {
   return new Configuration ({
     providers: [
       new ProviderMemory ({ scope: 'local' }),
@@ -18,7 +17,7 @@ function getConf ( validator ) {
     ],
     defaults: Fixtures.defaults (),
     schema: Fixtures.schema (),
-    validator
+    filterer: AJV.filterer
   });
 }
 
@@ -28,7 +27,7 @@ benchmark.defaultOptions = Object.assign ( benchmark.defaultOptions, {
   iterations: 5000,
   log: 'compact',
   beforeEach: ctx => {
-    ctx.conf = getConf ( validator );
+    ctx.conf = getConf ();
   },
   afterEach: ctx => {
     ctx.conf.dispose ();
@@ -44,7 +43,8 @@ benchmark.group ( 'constructor', () => {
       new Configuration ({
         providers: [
           new ProviderMemory ({ scope: 'foo' })
-        ]
+        ],
+        filterer: AJV.filterer
       });
     }
   });
@@ -58,7 +58,8 @@ benchmark.group ( 'constructor', () => {
           new ProviderMemory ({ scope: 'foo' })
         ],
         defaults: Fixtures.defaults (),
-        schema: Fixtures.schema ()
+        schema: Fixtures.schema (),
+        filterer: AJV.filterer
       });
     }
   });
@@ -97,19 +98,6 @@ benchmark ({
   name: 'refresh',
   fn: ctx => {
     ctx.conf.refresh ();
-  }
-});
-
-benchmark ({
-  name: 'validate',
-  fn: ctx => {
-    ctx.conf.validate ({
-      core: {
-        foo: 'foo',
-        bar: 'bar',
-        baz: 123
-      }
-    });
   }
 });
 

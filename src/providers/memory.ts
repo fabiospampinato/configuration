@@ -40,13 +40,13 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
       this.data = pp.unflat ( this.dataParser.parse ( data ) ?? this.defaults );
       this.dataRaw = data;
-      this.dataSchema = this.validate ( this.data );
+      this.dataSchema = this.filterer ( this.data );
 
     } else {
 
       this.data = pp.unflat ( data );
       this.dataRaw = this.dataParser.stringify ( data ) ?? this.defaultsRaw;
-      this.dataSchema = this.validate ( this.data );
+      this.dataSchema = this.filterer ( this.data );
 
     }
 
