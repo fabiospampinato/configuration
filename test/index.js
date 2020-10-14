@@ -978,7 +978,7 @@ describe ( 'Configuration', () => {
 
       // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
 
-      await delay ( 1000 );
+      await delay ( 3500 );
 
       fs.writeFileSync ( conf.scopes.global.path, JSON.stringify ({
         core: {
@@ -987,7 +987,7 @@ describe ( 'Configuration', () => {
         }
       }));
 
-      await delay ( 1500 );
+      await delay ( 3500 );
 
       t.is ( conf.get ( 'core.bar' ), 'custom' );
       t.is ( conf.get ( 'core.test' ), undefined );
@@ -1000,11 +1000,11 @@ describe ( 'Configuration', () => {
 
       // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
 
-      await delay ( 1000 );
+      await delay ( 3500 );
 
       fs.writeFileSync ( conf.scopes.global.path, '{' );
 
-      await delay ( 1500 );
+      await delay ( 3500 );
 
       t.is ( conf.get ( 'core.bar' ), 'defaults' );
       t.true ( _.isEqual ( conf.scopes.global.dataSchema, {} ) );
@@ -1017,11 +1017,11 @@ describe ( 'Configuration', () => {
 
       // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
 
-      await delay ( 1000 );
+      await delay ( 3500 );
 
       fs.writeFileSync ( conf.scopes.global.path, '' );
 
-      await delay ( 1500 );
+      await delay ( 3500 );
 
       t.is ( conf.get ( 'core.bar' ), 'defaults' );
       t.is ( conf.get ( 'core.test' ), undefined );
@@ -1035,7 +1035,7 @@ describe ( 'Configuration', () => {
 
       // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
 
-      await delay ( 1000 );
+      await delay ( 3500 );
 
       const dataNext = JSON.stringify ({
         core: {
@@ -1046,7 +1046,7 @@ describe ( 'Configuration', () => {
 
       fs.writeFileSync ( conf.scopes.global.path, dataNext );
 
-      await delay ( 1500 );
+      await delay ( 3500 );
 
       t.is ( conf.get ( 'core.bar' ), 'custom' );
       t.is ( conf.get ( 'core.test' ), undefined );
@@ -1060,14 +1060,14 @@ describe ( 'Configuration', () => {
 
       // await new Promise ( resolve => conf.scopes.local.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
 
-      await delay ( 1000 );
+      await delay ( 3500 );
 
       fs.writeFileSync ( conf.scopes.local.path, `{
         "core.foo": "foo",
         "core.bar": "bar"
       }`);
 
-      await delay ( 1500 );
+      await delay ( 3500 );
 
       t.is ( conf.get ( 'core.foo' ), 'foo' );
       t.is ( conf.get ( 'core.bar' ), 'bar' );

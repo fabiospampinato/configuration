@@ -52,6 +52,10 @@ type ChangeHandlerData = {
 
 type Disposer = () => void;
 
+type FSWatcher = {
+  close: () => void
+};
+
 type Options = {
   providers: Provider[],
   defaults: Data,
@@ -92,4 +96,4 @@ type ProviderStorageOptions = ProviderAbstractOptions & {
 
 /* EXPORT */
 
-export {Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, ExtendData, Value, ValueArray, ValueObject, Schema, Filterer, FiltererWrapper, ChangeHandler, ChangeHandlerData, Disposer, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};
+export {Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, ExtendData, Value, ValueArray, ValueObject, Schema, Filterer, FiltererWrapper, ChangeHandler, ChangeHandlerData, Disposer, FSWatcher, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};

@@ -2,8 +2,7 @@
 /* IMPORT */
 
 import {WriteOptions} from 'atomically/dist/types';
-import {FSWatcher} from 'chokidar';
-import {ProviderFileOptions} from '../types';
+import {FSWatcher, ProviderFileOptions} from '../types';
 import File from '../utils/file';
 import ProviderMemory from './memory';
 
