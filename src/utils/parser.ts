@@ -1,7 +1,7 @@
 
 /* IMPORT */
 
-import * as JSON5 from 'json5';
+import * as stringComments from 'strip-json-comments';
 import {Data, DataRaw} from '../types';
 import Type from './type';
 
@@ -21,7 +21,7 @@ class Parser {
 
     try {
 
-      const data = JSON5.parse ( raw );
+      const data = JSON.parse ( stringComments ( raw ) );
 
       if ( Type.isObject ( data ) ) return data;
 
