@@ -52,7 +52,8 @@
     "plain-object-clone": "^1.1.0",
     "plain-object-is-equal": "^1.0.0",
     "plain-object-merge": "^1.0.1",
-    "strip-json-comments": "^3.1.1"
+    "strip-json-comments": "^3.1.1",
+    "watcher": "^1.0.0"
   },
   "devDependencies": {
     "@types/json-schema": "^7.0.4",

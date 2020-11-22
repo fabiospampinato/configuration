@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import {readFile, readFileSync, writeFile, writeFileSync} from 'atomically';
-import * as fs from 'fs';
+import Watcher from 'watcher';
 import {FSWatcher} from '../types';
 
 /* FILE */
@@ -14,9 +14,7 @@ const File = {
   writeSync: writeFileSync,
   watch ( filePath: string, callback: Function ): FSWatcher {
     const listener = () => callback ();
-    const close = () => fs.unwatchFile ( filePath, listener );
-    fs.watchFile ( filePath, { persistent: false, interval: 3000 }, listener );
-    return {close};
+    return new Watcher ( filePath, { persistent: false, pollingInterval: 3000 }, listener );
   }
 };
 
