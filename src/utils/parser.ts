@@ -1,7 +1,7 @@
 
 /* IMPORT */
 
-import * as stringComments from 'strip-json-comments';
+import JSONC from 'jsonc-simple-parser';
 import {Data, DataRaw} from '../types';
 import Type from './type';
 
@@ -21,7 +21,7 @@ class Parser {
 
     try {
 
-      const data = JSON.parse ( stringComments ( raw ) );
+      const data = JSONC.parse ( raw );
 
       if ( Type.isObject ( data ) ) return data;
 
@@ -33,11 +33,11 @@ class Parser {
 
     try {
 
-      if ( !Type.isArray ( data ) ) return JSON.stringify ( data, undefined, this.indentation );
+      if ( !Type.isArray ( data ) ) return JSONC.stringify ( data, undefined, this.indentation );
 
       //TODO: Publish the following code as 2 separate packages
 
-      const lines = data.map ( item => JSON.stringify ( item, undefined, ' ' )
+      const lines = data.map ( item => JSONC.stringify ( item, undefined, ' ' )
                         .replace ( /\[\s*?(?:\r?\n|\r)\s*/g, '[' )
                         .replace ( /\s*?(?:\r?\n|\r)\s*]/g, ']' )
                         .replace ( /{\s*?(?:\r?\n|\r)\s*/g, '{ ' )
