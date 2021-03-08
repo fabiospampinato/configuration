@@ -1,7 +1,7 @@
 {
   "name": "configuration",
   "description": "Performant and feature rich library for managing configurations/settings.",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
