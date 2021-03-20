@@ -9,6 +9,8 @@ import ProviderFile from './file';
 
 /* JSON */
 
+//TODO: preserve the existing path keys instead of modifying them
+
 class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> extends ProviderFile<Options> {
 
   async read (): Promise<DataUpdate> {
