@@ -48,7 +48,7 @@
   "dependencies": {
     "atomically": "^1.7.0",
     "is-primitive": "^3.0.1",
-    "jsonc-simple-parser": "^1.0.0",
+    "jsonc-simple-parser": "^2.1.0",
     "path-prop": "^1.1.2",
     "plain-object-clone": "^1.1.0",
     "plain-object-is-equal": "^1.0.0",

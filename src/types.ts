@@ -24,7 +24,7 @@ type DataUpdate = {
 
 type DataParser = {
   parse: ( raw: DataRaw ) => Data | undefined,
-  stringify: ( data: Data ) => DataRaw | undefined
+  stringify: ( data: Data, dataRawPrev: DataRaw ) => DataRaw | undefined
 };
 
 type Value = ValuePrimitive | ValueArray | ValueObject;

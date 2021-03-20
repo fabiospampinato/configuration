@@ -543,6 +543,27 @@ describe ( 'Configuration', () => {
 
     });
 
+    it ( 'can set while preserving the current broken data string', t => {
+
+      const conf = new Configuration ( Fixtures.options () );
+
+      const valuePrev = {},
+            valuePrevRaw = '\n\n{ "core": {},,, \n "broken": {} }\n\n',
+            valueNext = { core: { foo: 'asd' } },
+            valueNextRaw = `${JSON.stringify ( valueNext, undefined, 2 )}\n\n// BACKUP (${new Date ().toLocaleString ()})\n// { "core": {},,, \n//  "broken": {} }`;
+
+      conf.scopes.local.writeSync ( valuePrevRaw );
+
+      t.deepEqual ( conf.scopes.local.data, valuePrev );
+      t.is ( conf.scopes.local.dataRaw, valuePrevRaw );
+
+      conf.set ( 'local', 'core.foo', 'asd' );
+
+      t.deepEqual ( conf.scopes.local.data, valueNext );
+      t.is ( conf.scopes.local.dataRaw, valueNextRaw );
+
+    });
+
     it ( 'throws when trying to change defaults', t => {
 
       const conf = new Configuration ( Fixtures.options () );

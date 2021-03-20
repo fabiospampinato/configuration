@@ -45,7 +45,7 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
     } else {
 
       this.data = pp.unflat ( data );
-      this.dataRaw = this.dataParser.stringify ( data ) ?? this.defaultsRaw;
+      this.dataRaw = this.dataParser.stringify ( data, this.dataRaw ) ?? this.defaultsRaw;
       this.dataSchema = this.filterer ( this.data );
 
     }
