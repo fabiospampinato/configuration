@@ -29,7 +29,7 @@ class Parser {
 
   }
 
-  stringify ( data: Data, dataRawPrev: DataRaw ): DataRaw | undefined {
+  stringify ( data: Data, dataRawPrev?: DataRaw ): DataRaw | undefined {
 
     const getContent = ( data: Data ): DataRaw => {
 
@@ -56,7 +56,9 @@ class Parser {
 
     };
 
-    const getBackup = ( dataRaw: DataRaw ): DataRaw => {
+    const getBackup = ( dataRaw?: DataRaw ): DataRaw => {
+
+      if ( !dataRaw ) return '';
 
       const isValid = JSONC.validate ( dataRaw );
 
