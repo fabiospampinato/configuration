@@ -1,17 +1,16 @@
 
 /* IMPORT */
 
-import * as isPrimitive from 'is-primitive';
-import pp from 'path-prop';
 import cloneDeep from 'plain-object-clone';
 import isEqual from 'plain-object-is-equal';
 import merge from 'plain-object-merge';
-import {Scope, ScopeAll, Scopes, Path, Value, Data, DataRaw, Schema, ExtendData, Disposer, ChangeHandler, ChangeHandlerData, Options, Provider, Filterer, FiltererWrapper} from './types';
 import {SCOPE_ALL, SCOPE_DEFAULTS} from './config';
 import ProviderMemory from './providers/memory';
+import PathProp from './utils/pp';
 import Type from './utils/type';
+import type {Scope, ScopeAll, Scopes, Path, Value, Data, DataRaw, Schema, ExtendData, Disposer, ChangeHandler, ChangeHandlerData, Options, Provider, Filterer, FiltererWrapper} from './types';
 
-/* CONFIGURATION */
+/* MAIN */
 
 class Configuration {
 
@@ -25,7 +24,7 @@ class Configuration {
   filtererRaw: Filterer;
   filterer: FiltererWrapper;
   scope: Scope;
-  dataSchema: Data;
+  dataSchema!: Data;
   handlers: ChangeHandlerData[];
 
   /* CONSTRUCTOR */
@@ -116,24 +115,24 @@ class Configuration {
 
     if ( this.schema && data.schema ) {
 
-      let segments = namespace.split ( '.' ),
-          schemaPatch = {};
+      let segments = namespace.split ( '.' );
+      let schemaPatch = {};
 
       for ( let i = 0, l = segments.length - 1; i < l; i++ ) {
 
         namespaceSchema += `${i ? '.' : ''}properties.${segments[i]}`;
 
-        const typePrev = pp.get ( this.schema, `${namespaceSchema}.type` );
+        const typePrev = PathProp.get ( this.schema, `${namespaceSchema}.type` );
 
         if ( typePrev && typePrev !== 'object' ) throw new Error ( `The provided schema for the "${namespace}" is incompatible with the existing schema` );
 
-        schemaPatch = pp.set ( schemaPatch, namespaceSchema, { type: 'object', properties: {} } );
+        schemaPatch = PathProp.set ( schemaPatch, namespaceSchema, { type: 'object', properties: {} } );
 
       }
 
       namespaceSchema += `${namespaceSchema ? '.' : ''}properties.${segments[segments.length - 1]}`;
 
-      schemaPatch = pp.set ( schemaPatch, namespaceSchema, data.schema );
+      schemaPatch = PathProp.set ( schemaPatch, namespaceSchema, data.schema );
 
       const schema = merge ([ this.schema, schemaPatch ]);
 
@@ -143,7 +142,7 @@ class Configuration {
 
     if ( data.defaults ) {
 
-      this.defaults.writeSync ( pp.set ( this.defaults.data, namespace, pp.unflat ( data.defaults ) ), true );
+      this.defaults.writeSync ( PathProp.set ( this.defaults.data, namespace, PathProp.unflat ( data.defaults ) ), true );
 
     }
 
@@ -151,13 +150,13 @@ class Configuration {
 
       if ( this.schema && data.schema ) {
 
-        pp.delete ( this.schema, namespaceSchema );
+        PathProp.delete ( this.schema, namespaceSchema );
 
       }
 
       if ( data.defaults ) {
 
-        pp.delete ( this.defaults.data, namespace );
+        PathProp.delete ( this.defaults.data, namespace );
 
         this.defaults.writeSync ( this.defaults.data, true );
 
@@ -169,8 +168,8 @@ class Configuration {
 
   refresh (): void {
 
-    const datas = this.providers.map ( provider => provider.dataSchema ).reverse (),
-          datasFiltered = datas.filter ( data => Type.isArray ( data ) === this.isArray );
+    const datas = this.providers.map ( provider => provider.dataSchema ).reverse ();
+    const datasFiltered = datas.filter ( data => Type.isArray ( data ) === this.isArray );
 
     this.dataSchema = this.isArray ? Array.prototype.concat ( ...datasFiltered ) : merge ( datasFiltered );
 
@@ -193,7 +192,7 @@ class Configuration {
 
       for ( let scope in this.scopes ) {
 
-        accumulator[scope] = Type.isUndefined ( path ) ? this.scopes[scope].dataSchema : pp.get ( this.scopes[scope].dataSchema, path );
+        accumulator[scope] = Type.isUndefined ( path ) ? this.scopes[scope].dataSchema : PathProp.get ( this.scopes[scope].dataSchema, path );
 
       }
 
@@ -201,7 +200,7 @@ class Configuration {
 
     } else if ( Type.isUndefined ( path ) ) { // Path
 
-      return pp.get ( this.dataSchema, scope );
+      return PathProp.get ( this.dataSchema, scope );
 
     } else { // Scope + Path
 
@@ -209,7 +208,7 @@ class Configuration {
 
       if ( !provider ) throw new Error ( 'You can\'t get from unknown scopes' );
 
-      return pp.get ( provider.dataSchema, path );
+      return PathProp.get ( provider.dataSchema, path );
 
     }
 
@@ -227,7 +226,7 @@ class Configuration {
 
       for ( let scope in this.scopes ) {
 
-        accumulator[scope] = Type.isUndefined ( path ) ? !!this.scopes[scope].dataSchema : pp.has ( this.scopes[scope].dataSchema, path );
+        accumulator[scope] = Type.isUndefined ( path ) ? !!this.scopes[scope].dataSchema : PathProp.has ( this.scopes[scope].dataSchema, path );
 
       }
 
@@ -235,7 +234,7 @@ class Configuration {
 
     } else if ( Type.isUndefined ( path ) ) { // Path
 
-      return pp.has ( this.dataSchema, scope );
+      return PathProp.has ( this.dataSchema, scope );
 
     } else { // Scope + Path
 
@@ -243,7 +242,7 @@ class Configuration {
 
       if ( !provider ) throw new Error ( 'You can\'t check unknown scopes' );
 
-      return pp.has ( provider.dataSchema, path );
+      return PathProp.has ( provider.dataSchema, path );
 
     }
 
@@ -266,9 +265,9 @@ class Configuration {
 
         const provider = this.scopes[scope];
 
-        if ( pp.get ( provider.data, path ) === value ) continue;
+        if ( PathProp.get ( provider.data, path ) === value ) continue;
 
-        pp.set ( provider.data, path, value );
+        PathProp.set ( provider.data, path, value );
 
         provider.write ( provider.data, true );
 
@@ -282,9 +281,9 @@ class Configuration {
 
       if ( !provider ) throw new Error ( 'You can\'t set in unknown scopes' );
 
-      if ( pp.get ( provider.data, path ) === value ) return;
+      if ( PathProp.get ( provider.data, path ) === value ) return;
 
-      pp.set ( provider.data, path, value );
+      PathProp.set ( provider.data, path, value );
 
       provider.write ( provider.data, true );
 
@@ -307,9 +306,9 @@ class Configuration {
 
         const provider = this.scopes[scope];
 
-        if ( !pp.has ( provider.data, path ) ) continue;
+        if ( !PathProp.has ( provider.data, path ) ) continue;
 
-        pp.delete ( provider.data, path );
+        PathProp.delete ( provider.data, path );
 
         provider.write ( provider.data, true );
 
@@ -323,9 +322,9 @@ class Configuration {
 
       if ( !provider ) throw new Error ( 'You can\'t remove from unknown scopes' );
 
-      if ( !pp.has ( provider.data, path ) ) return;
+      if ( !PathProp.has ( provider.data, path ) ) return;
 
-      pp.delete ( provider.data, path );
+      PathProp.delete ( provider.data, path );
 
       provider.write ( provider.data, true );
 
@@ -398,12 +397,12 @@ class Configuration {
 
     for ( let i = 0, l = this.handlers.length; i < l; i++ ) {
 
-      const data = this.handlers[i],
-            value = data.getter ();
+      const data = this.handlers[i];
+      const value = data.getter ();
 
       if ( isEqual ( data.value, value ) ) continue;
 
-      const clone = isPrimitive ( value ) ? value : cloneDeep ( value );
+      const clone = Type.isPrimitive ( value ) ? value : cloneDeep ( value );
 
       data.callback ( clone, data.value );
 
@@ -420,14 +419,14 @@ class Configuration {
   onChange ( path: Path, handler: ChangeHandler ): Disposer;
   onChange ( scope: Scope | Path | ChangeHandler, path?: Path | ChangeHandler, handler?: ChangeHandler ): Disposer {
 
-    const {handlers} = this,
-          args = arguments,
-          getterArgs = Array.prototype.slice.call ( args, 0, -1 ),
-          callback = args[args.length - 1],
-          getter = () => this.get.apply ( this, getterArgs ),
-          valueRaw = getter (),
-          value = isPrimitive ( valueRaw ) ? valueRaw : cloneDeep ( valueRaw ),
-          data: ChangeHandlerData = {callback, getter, value};
+    const {handlers} = this;
+    const args = arguments;
+    const getterArgs = Array.prototype.slice.call ( args, 0, -1 );
+    const callback = args[args.length - 1];
+    const getter = () => this.get.apply ( this, getterArgs );
+    const valueRaw = getter ();
+    const value = Type.isPrimitive ( valueRaw ) ? valueRaw : cloneDeep ( valueRaw );
+    const data: ChangeHandlerData = {callback, getter, value};
 
     handlers[handlers.length] = data;
 

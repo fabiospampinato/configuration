@@ -1,11 +1,11 @@
 
 /* IMPORT */
 
-const tempy = require ( 'tempy' ),
-      {default: ProviderJSON} = require ( '../dist/providers/json' ),
-      AJV = require ( './ajv' );
+import tempy from 'tempy';
+import ProviderJSON from '../dist/providers/json.js';
+import AJV from './ajv.js';
 
-/* FIXTURES */
+/* MAIN */
 
 const Fixtures = {
   options ( providerOptions = {} ) {
@@ -177,4 +177,4 @@ const FixturesArray = {
 
 /* EXPORT */
 
-module.exports = {Fixtures, FixturesArray};
+export {Fixtures, FixturesArray};

@@ -1,38 +1,49 @@
 
 /* IMPORT */
 
-import * as isPrimitive from 'is-primitive';
-import {ValueArray, ValueObject} from '../types';
+import type {ValueArray, ValueObject} from '../types';
 
-/* TYPE */
+/* MAIN */
 
 const Type = {
 
-  isNull ( x: any ): x is null {
+  /* API */
 
-    return x === null;
+  isNull ( value: unknown ): value is null {
 
-  },
-
-  isArray ( x: any ): x is any[] {
-
-    return Array.isArray ( x );
+    return value === null;
 
   },
 
-  isObject ( x: any ): x is ValueArray | ValueObject {
+  isArray ( value: unknown ): value is unknown[] {
 
-    return !isPrimitive ( x );
+    return Array.isArray ( value );
 
   },
 
-  isString ( x: any ): x is string {
+  isObject ( x: unknown ): x is ValueArray | ValueObject {
+
+    return !Type.isPrimitive ( x );
+
+  },
+
+  isPrimitive: ( value: unknown ): value is bigint | symbol | string | number | boolean | null | undefined => {
+
+    if ( value === null ) return true;
+
+    const type = typeof value;
+
+    return type !== 'object' && type !== 'function';
+
+  },
+
+  isString ( x: unknown ): x is string {
 
     return typeof x === 'string';
 
   },
 
-  isUndefined ( x: any ): x is undefined {
+  isUndefined ( x: unknown ): x is undefined {
 
     return typeof x === 'undefined';
 

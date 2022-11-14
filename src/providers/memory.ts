@@ -2,14 +2,16 @@
 /* IMPORT */
 
 import cloneDeep from 'plain-object-clone';
-import pp from 'path-prop';
-import {Data, DataRaw, DataUpdate, ProviderMemoryOptions} from '../types';
+import type {Data, DataRaw, DataUpdate, ProviderMemoryOptions} from '../types';
+import PathProp from '../utils/pp';
 import Type from '../utils/type';
 import ProviderAbstract from './abstract';
 
-/* MEMORY */
+/* MAIN */
 
 class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptions> extends ProviderAbstract<Options> {
+
+  /* API */
 
   async read (): Promise<DataUpdate> {
 
@@ -19,8 +21,8 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
   readSync (): DataUpdate {
 
-    const data = this.data ?? cloneDeep ( this.defaults ),
-          dataRaw = this.dataRaw ?? this.defaultsRaw;
+    const data = this.data ?? cloneDeep ( this.defaults );
+    const dataRaw = this.dataRaw ?? this.defaultsRaw;
 
     return {data, dataRaw};
 
@@ -38,13 +40,13 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
     if ( Type.isString ( data ) ) {
 
-      this.data = pp.unflat ( this.dataParser.parse ( data ) ?? this.defaults );
+      this.data = PathProp.unflat ( this.dataParser.parse ( data ) ?? this.defaults );
       this.dataRaw = data;
       this.dataSchema = this.filterer ( this.data );
 
     } else {
 
-      this.data = pp.unflat ( data );
+      this.data = PathProp.unflat ( data );
       this.dataRaw = this.dataParser.stringify ( data, this.dataRaw ) ?? this.defaultsRaw;
       this.dataSchema = this.filterer ( this.data );
 

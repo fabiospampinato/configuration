@@ -2,24 +2,28 @@
 /* IMPORT */
 
 import isEqual from 'plain-object-is-equal';
-import pp from 'path-prop';
-import {Disposer, Data, DataRaw, DataUpdate, DataParser, ProviderChangeHandler, ProviderAbstractOptions} from '../types';
+import type {Disposer, Data, DataRaw, DataUpdate, DataParser, ProviderChangeHandler, ProviderAbstractOptions} from '../types';
 import {DEFAULTS, SCOPE_ALL} from '../config';
 import Parser from '../utils/parser';
+import PathProp from '../utils/pp';
 import Type from '../utils/type';
 
-/* ABSTRACT */
+/* MAIN */
 
 abstract class ProviderAbstract<Options extends ProviderAbstractOptions = ProviderAbstractOptions> {
 
+  /* VARIABLES */
+
   scope: string;
-  data: Data;
-  dataRaw: DataRaw;
-  dataSchema: Data;
+  data!: Data;
+  dataRaw!: DataRaw;
+  dataSchema!: Data;
   dataParser: DataParser;
   defaults: Data;
   defaultsRaw: DataRaw;
   handlers: ProviderChangeHandler[];
+
+  /* CONSTRUCTOR */
 
   constructor ( options?: Partial<Options> ) {
 
@@ -28,12 +32,14 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
     this.scope = options?.scope ?? DEFAULTS.scope;
     this.dataParser = options?.parser ?? new Parser ( options?.indentation ?? DEFAULTS.indentation );
     this.defaultsRaw = options?.defaultsRaw ?? DEFAULTS.defaultsRaw;
-    this.defaults = pp.unflat ( options?.defaults ?? ( this.dataParser.parse ( this.defaultsRaw ) || DEFAULTS.defaults ) );
+    this.defaults = PathProp.unflat ( options?.defaults ?? ( this.dataParser.parse ( this.defaultsRaw ) || DEFAULTS.defaults ) );
     this.handlers = [];
 
     this.init ();
 
   }
+
+  /* API */
 
   init (): void {
 

@@ -1,21 +1,15 @@
 
 /* IMPORT */
 
-const _ = require ( 'lodash' );
-const { clone } = require('lodash');
+import _ from 'lodash';
+import Ajv from 'ajv';
+import Filter from 'ajv-filter';
 
-/* AJV */
+/* MAIN */
 
 const AJV = {
 
-  instance: undefined, // Caching instance
-
-  getInstance () {
-
-    if ( AJV.instance ) return AJV.instance;
-
-    const Ajv = require ( 'ajv' ), // Lazy import for performance
-          Filter = require ( 'ajv-filter' ); // Lazy import for performance
+  getInstance: _.memoize (() => {
 
     const options = { // Optimized for performance
       sourceCode: false,
@@ -34,11 +28,9 @@ const AJV = {
 
     return AJV.instance = ajv;
 
-  },
+  }),
 
   getSchema ( schema ) {
-
-    const Filter = require ( 'ajv-filter' ); // Lazy import for performance
 
     return Filter.patchSchema ( schema );
 
@@ -80,4 +72,4 @@ const AJV = {
 
 /* EXPORT */
 
-module.exports = AJV;
+export default AJV;

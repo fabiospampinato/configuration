@@ -1,12 +1,12 @@
 
-/* CONFIG */
+/* MAIN */
 
 const DEFAULTS = {
   id: 'confId',
   scope: 'provider',
-  indentation: 2,
+  indentation: '\t',
   defaults: {},
-  defaultsRaw: '{\n  \n}'
+  defaultsRaw: '{\n\t\n}'
 };
 
 const SCOPE_ALL = '*';

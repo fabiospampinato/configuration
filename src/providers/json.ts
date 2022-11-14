@@ -2,16 +2,18 @@
 /* IMPORT */
 
 import cloneDeep from 'plain-object-clone';
-import pp from 'path-prop';
-import {Data, DataRaw, DataUpdate, ProviderJSONOptions} from '../types';
+import type {Data, DataRaw, DataUpdate, ProviderJSONOptions} from '../types';
 import File from '../utils/file';
+import PathProp from '../utils/pp';
 import ProviderFile from './file';
 
-/* JSON */
+/* MAIN */
 
 //TODO: preserve the existing path keys instead of modifying them
 
 class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> extends ProviderFile<Options> {
+
+  /* API */
 
   async read (): Promise<DataUpdate> {
 
@@ -19,8 +21,8 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
     try {
 
-      const dataRaw = await File.read ( this.path, { encoding: 'utf8' } ) ?? this.defaultsRaw,
-            data = pp.unflat ( this.dataParser.parse ( dataRaw ) ?? this.defaults );
+      const dataRaw = await File.read ( this.path, { encoding: 'utf8' } ) ?? this.defaultsRaw;
+      const data = PathProp.unflat ( this.dataParser.parse ( dataRaw ) ?? this.defaults );
 
       return {data, dataRaw};
 
@@ -41,8 +43,8 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
     try {
 
-      const dataRaw = File.readSync ( this.path, { encoding: 'utf8' } ) ?? this.defaultsRaw,
-            data = pp.unflat ( this.dataParser.parse ( dataRaw ) ?? this.defaults );
+      const dataRaw = File.readSync ( this.path, { encoding: 'utf8' } ) ?? this.defaultsRaw;
+      const data = PathProp.unflat ( this.dataParser.parse ( dataRaw ) ?? this.defaults );
 
       return {data, dataRaw};
 

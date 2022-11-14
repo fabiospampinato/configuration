@@ -1,17 +1,21 @@
 
 /* IMPORT */
 
-import pp from 'path-prop';
-import {Data, DataRaw, DataUpdate, ProviderStorageOptions} from '../types';
+import type {Data, DataRaw, DataUpdate, ProviderStorageOptions} from '../types';
 import {DEFAULTS} from '../config';
+import PathProp from '../utils/pp';
 import ProviderMemory from './memory';
 
-/* STORAGE */
+/* MAIN */
 
 class ProviderStorage<Options extends ProviderStorageOptions = ProviderStorageOptions> extends ProviderMemory<Options> {
 
+  /* VARIABLES */
+
   id: string;
   storage?: Storage;
+
+  /* CONSTRUCTOR */
 
   constructor ( options: Partial<Options> ) {
 
@@ -26,12 +30,14 @@ class ProviderStorage<Options extends ProviderStorageOptions = ProviderStorageOp
 
   }
 
+  /* API */
+
   readSync (): DataUpdate {
 
     if ( !this.storage ) return super.readSync ();
 
-    const dataRaw = this.storage.getItem ( this.id ) ?? this.defaultsRaw,
-          data = pp.unflat ( this.dataParser.parse ( dataRaw ) ?? this.defaults );
+    const dataRaw = this.storage.getItem ( this.id ) ?? this.defaultsRaw;
+    const data = PathProp.unflat ( this.dataParser.parse ( dataRaw ) ?? this.defaults );
 
     return {data, dataRaw};
 

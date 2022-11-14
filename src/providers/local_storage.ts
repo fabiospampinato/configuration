@@ -1,12 +1,14 @@
 
 /* IMPORT */
 
-import {ProviderStorageOptions} from '../types';
+import type {ProviderStorageOptions} from '../types';
 import ProviderStorage from './storage';
 
-/* LOCAL STORAGE */
+/* MAIN */
 
 class ProviderLocalStorage<Options extends ProviderStorageOptions = ProviderStorageOptions> extends ProviderStorage<Options> {
+
+  /* CONSTRUCTOR */
 
   constructor ( options?: Partial<Options> ) {
 

@@ -1,20 +1,24 @@
 
 /* IMPORT */
 
-import {WriteOptions} from 'atomically/dist/types';
-import {FSWatcher, ProviderFileOptions} from '../types';
+import type {WriteOptions} from 'atomically/dist/types';
+import type {FSWatcher, ProviderFileOptions} from '../types';
 import File from '../utils/file';
 import ProviderMemory from './memory';
 
-/* FILE */
+/* MAIN */
 
 class ProviderFile<Options extends ProviderFileOptions = ProviderFileOptions> extends ProviderMemory<Options> {
+
+  /* MAIN */
 
   path?: string;
   watching: boolean;
   watcher?: FSWatcher;
   writeOptions?: WriteOptions;
   writeSyncOptions?: WriteOptions;
+
+  /* CONSTRUCTOR */
 
   constructor ( options: Partial<Options> ) {
 
@@ -27,6 +31,8 @@ class ProviderFile<Options extends ProviderFileOptions = ProviderFileOptions> ex
     this.swap ( options.path, true );
 
   }
+
+  /* API */
 
   dispose (): void {
 

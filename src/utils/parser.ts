@@ -2,20 +2,26 @@
 /* IMPORT */
 
 import JSONC from 'jsonc-simple-parser';
-import {Data, DataRaw} from '../types';
+import type {Data, DataRaw} from '../types';
 import Type from './type';
 
-/* PARSER */
+/* MAIN */
 
 class Parser {
 
+  /* VARIABLES */
+
   indentation: string | number | undefined;
+
+  /* CONSTRUCTOR */
 
   constructor ( indentation: string | number | undefined ) {
 
     this.indentation = indentation;
 
   }
+
+  /* API */
 
   parse ( raw: DataRaw ): Data | undefined {
 
@@ -64,10 +70,10 @@ class Parser {
 
       if ( isValid ) return '';
 
-      const timestamp = new Date ().toLocaleString (),
-            header = `// BACKUP (${timestamp})`,
-            comments = dataRaw.trim ().replace ( /^/gm, '// ' ),
-            backup = `\n\n${header}\n${comments}`;
+      const timestamp = new Date ().toLocaleString ();
+      const header = `// BACKUP (${timestamp})`;
+      const comments = dataRaw.trim ().replace ( /^/gm, '// ' );
+      const backup = `\n\n${header}\n${comments}`;
 
       return backup;
 
@@ -75,8 +81,8 @@ class Parser {
 
     try {
 
-      const content = getContent ( data ),
-            backup = getBackup ( dataRawPrev );
+      const content = getContent ( data );
+      const backup = getBackup ( dataRawPrev );
 
       return `${content}${backup}`;
 

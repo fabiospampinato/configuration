@@ -3,9 +3,9 @@
 
 import {readFile, readFileSync, writeFile, writeFileSync} from 'atomically';
 import Watcher from 'watcher';
-import {FSWatcher} from '../types';
+import type {FSWatcher} from '../types';
 
-/* FILE */
+/* MAIN */
 
 const File = {
   read: readFile,

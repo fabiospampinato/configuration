@@ -1,12 +1,14 @@
 
 /* IMPORT */
 
-import {ProviderStorageOptions} from '../types';
+import type {ProviderStorageOptions} from '../types';
 import ProviderStorage from './storage';
 
-/* SESSION STORAGE */
+/* MAIN */
 
 class ProviderSessionStorage<Options extends ProviderStorageOptions = ProviderStorageOptions> extends ProviderStorage<Options> {
+
+  /* CONSTRUCTOR */
 
   constructor ( options?: Partial<Options> ) {
 

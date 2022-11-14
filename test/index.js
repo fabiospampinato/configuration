@@ -1,18 +1,18 @@
 
 /* IMPORT */
 
-import * as _ from 'lodash';
-import delay from 'delay';
-import * as fs from 'fs';
-import * as tempy from 'tempy';
-import {describe} from 'ava-spec';
-import Configuration from '../dist';
-import ProviderJSON from '../dist/providers/json';
-import ProviderMemory from '../dist/providers/memory';
-import {Fixtures, FixturesArray} from './fixtures';
-import AJV from './ajv';
+import _ from 'lodash';
+import {describe} from 'fava';
+import fs from 'node:fs';
+import {setTimeout as delay} from 'node:timers/promises';
+import tempy from 'tempy';
+import Configuration from '../dist/index.js';
+import ProviderJSON from '../dist/providers/json.js';
+import ProviderMemory from '../dist/providers/memory.js';
+import {Fixtures, FixturesArray} from './fixtures.js';
+import AJV from './ajv.js';
 
-/* CONFIGURATION */
+/* MAIN */
 
 //TODO: Add some tests for the other providers
 //TODO: Add more array-based tests, and improve existing ones
@@ -282,8 +282,8 @@ describe ( 'Configuration', () => {
 
     it ( 'updates the current data', t => {
 
-      const conf = new Configuration ( Fixtures.options () ),
-            dataPrev = _.cloneDeep ( conf.get () );
+      const conf = new Configuration ( Fixtures.options () );
+      const dataPrev = _.cloneDeep ( conf.get () );
 
       conf.scopes.global.dataSchema = {};
 
@@ -348,8 +348,8 @@ describe ( 'Configuration', () => {
 
     it ( 'can return all scopes data', t => {
 
-      const conf = new Configuration ( Fixtures.options () ),
-            datas = conf.get ( '*' );
+      const conf = new Configuration ( Fixtures.options () );
+      const datas = conf.get ( '*' );
 
       conf.providers.forEach ( ( provider, index ) => {
         t.is ( datas[provider.scope], provider.dataSchema );
@@ -359,8 +359,8 @@ describe ( 'Configuration', () => {
 
     it ( 'can query all scopes', t => {
 
-      const conf = new Configuration ( Fixtures.options () ),
-            datas = conf.get ( '*', 'core.baz' );
+      const conf = new Configuration ( Fixtures.options () );
+      const datas = conf.get ( '*', 'core.baz' );
 
       t.is ( datas.defaults, 'defaults' );
       t.is ( datas.local, 'local' );
@@ -414,8 +414,8 @@ describe ( 'Configuration', () => {
 
     it ( 'can check all scopes data', t => {
 
-      const conf = new Configuration ( Fixtures.options () ),
-            datas = conf.has ( '*', 'core.baz' );
+      const conf = new Configuration ( Fixtures.options () );
+      const datas = conf.has ( '*', 'core.baz' );
 
       t.true ( datas.defaults );
       t.true ( datas.local );
@@ -547,10 +547,10 @@ describe ( 'Configuration', () => {
 
       const conf = new Configuration ( Fixtures.options () );
 
-      const valuePrev = {},
-            valuePrevRaw = '\n\n{ "core": {},,, \n "broken": {} }\n\n',
-            valueNext = { core: { foo: 'asd' } },
-            valueNextRaw = `${JSON.stringify ( valueNext, undefined, 2 )}\n\n// BACKUP (${new Date ().toLocaleString ()})\n// { "core": {},,, \n//  "broken": {} }`;
+      const valuePrev = {};
+      const valuePrevRaw = '\n\n{ "core": {},,, \n "broken": {} }\n\n';
+      const valueNext = { core: { foo: 'asd' } };
+      const valueNextRaw = `${JSON.stringify ( valueNext, undefined, '\t' )}\n\n// BACKUP (${new Date ().toLocaleString ()})\n// { "core": {},,, \n//  "broken": {} }`;
 
       conf.scopes.local.writeSync ( valuePrevRaw );
 
