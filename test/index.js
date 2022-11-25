@@ -135,148 +135,148 @@ describe ( 'Configuration', () => {
 
   });
 
-  describe.skip ( 'extend', it => { //FIXME
+  // describe.skip ( 'extend', it => { //FIXME
 
-    it ( 'adds a namespace', t => {
+  //   it ( 'adds a namespace', t => {
 
-      const conf = new Configuration ( Fixtures.options () );
+  //     const conf = new Configuration ( Fixtures.options () );
 
-      conf.extend ( 'ext.test', {
-        defaults: {
-          foo: 'foo',
-          bar: 123
-        },
-        schema: {
-          type: 'object',
-          properties: {
-            foo: {
-              type: 'string'
-            },
-            bar: {
-              type: 'number'
-            },
-            baz: {
-              type: 'string'
-            }
-          }
-        }
-      });
+  //     conf.extend ( 'ext.test', {
+  //       defaults: {
+  //         foo: 'foo',
+  //         bar: 123
+  //       },
+  //       schema: {
+  //         type: 'object',
+  //         properties: {
+  //           foo: {
+  //             type: 'string'
+  //           },
+  //           bar: {
+  //             type: 'number'
+  //           },
+  //           baz: {
+  //             type: 'string'
+  //           }
+  //         }
+  //       }
+  //     });
 
-      t.is ( conf.get ( 'ext.test.foo' ), 'foo' );
-      t.is ( conf.get ( 'ext.test.bar' ), 123 );
-      t.is ( conf.get ( 'ext.test.baz' ), undefined );
+  //     t.is ( conf.get ( 'ext.test.foo' ), 'foo' );
+  //     t.is ( conf.get ( 'ext.test.bar' ), 123 );
+  //     t.is ( conf.get ( 'ext.test.baz' ), undefined );
 
-      conf.set ( 'ext.test.baz', 'test' );
+  //     conf.set ( 'ext.test.baz', 'test' );
 
-      t.is ( conf.get ( 'ext.test.baz' ), 'test' );
+  //     t.is ( conf.get ( 'ext.test.baz' ), 'test' );
 
-    });
+  //   });
 
-    it ( 'returns a disposer which removes the namespace', t => {
+  //   it ( 'returns a disposer which removes the namespace', t => {
 
-      const conf = new Configuration ( Fixtures.options () );
+  //     const conf = new Configuration ( Fixtures.options () );
 
-      const disposer = conf.extend ( 'ext.test', {
-        defaults: {
-          foo: 'foo',
-          bar: 123
-        },
-        schema: {
-          type: 'object',
-          properties: {
-            foo: {
-              type: 'string'
-            },
-            bar: {
-              type: 'number'
-            },
-            baz: {
-              type: 'string'
-            }
-          }
-        }
-      });
+  //     const disposer = conf.extend ( 'ext.test', {
+  //       defaults: {
+  //         foo: 'foo',
+  //         bar: 123
+  //       },
+  //       schema: {
+  //         type: 'object',
+  //         properties: {
+  //           foo: {
+  //             type: 'string'
+  //           },
+  //           bar: {
+  //             type: 'number'
+  //           },
+  //           baz: {
+  //             type: 'string'
+  //           }
+  //         }
+  //       }
+  //     });
 
-      disposer ();
+  //     disposer ();
 
-      t.is ( conf.get ( 'ext.test.foo' ), undefined );
-      t.is ( conf.get ( 'ext.test.bar' ), undefined );
-      t.is ( conf.get ( 'ext.test.baz' ), undefined );
-      t.is ( conf.get ( 'ext.test' ), undefined );
+  //     t.is ( conf.get ( 'ext.test.foo' ), undefined );
+  //     t.is ( conf.get ( 'ext.test.bar' ), undefined );
+  //     t.is ( conf.get ( 'ext.test.baz' ), undefined );
+  //     t.is ( conf.get ( 'ext.test' ), undefined );
 
-      t.is ( _.get ( conf.schema, 'properties.ext.properties.test' ), undefined );
+  //     t.is ( _.get ( conf.schema, 'properties.ext.properties.test' ), undefined );
 
-    });
+  //   });
 
-    it ( 'supports flattened objects', t => {
+  //   it ( 'supports flattened objects', t => {
 
-      const conf = new Configuration ( Fixtures.options () );
+  //     const conf = new Configuration ( Fixtures.options () );
 
-      conf.extend ( 'flattened', {
-        defaults: {
-          'foo.bar': 'string'
-        },
-        schema: {
-          type: 'object',
-          properties: {
-            foo: {
-              type: 'object',
-              properties: {
-                bar: {
-                  type: 'string'
-                }
-              }
-            }
-          }
-        }
-      });
+  //     conf.extend ( 'flattened', {
+  //       defaults: {
+  //         'foo.bar': 'string'
+  //       },
+  //       schema: {
+  //         type: 'object',
+  //         properties: {
+  //           foo: {
+  //             type: 'object',
+  //             properties: {
+  //               bar: {
+  //                 type: 'string'
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     });
 
-      t.is ( conf.get ( 'flattened.foo.bar' ), 'string' );
+  //     t.is ( conf.get ( 'flattened.foo.bar' ), 'string' );
 
-    });
+  //   });
 
-    it ( 'throws an error if the namespace is already in use', t => {
+  //   it ( 'throws an error if the namespace is already in use', t => {
 
-      const conf = new Configuration ( Fixtures.options () );
+  //     const conf = new Configuration ( Fixtures.options () );
 
-      t.throws ( () => {
-        conf.extend ( 'core', {} );
-      }, /already in use/ );
+  //     t.throws ( () => {
+  //       conf.extend ( 'core', {} );
+  //     }, /already in use/ );
 
-    });
+  //   });
 
-    it ( 'throws an error if the schema is missing when validation is enabled', t => {
+  //   it ( 'throws an error if the schema is missing when validation is enabled', t => {
 
-      const conf = new Configuration ( Fixtures.options () );
+  //     const conf = new Configuration ( Fixtures.options () );
 
-      t.throws ( () => {
-        conf.extend ( 'ext.test', {} );
-      }, /You need to provide a schema/ );
+  //     t.throws ( () => {
+  //       conf.extend ( 'ext.test', {} );
+  //     }, /You need to provide a schema/ );
 
-    });
+  //   });
 
-    it ( 'throws an error if the schema is invalid', t => {
+  //   it ( 'throws an error if the schema is invalid', t => {
 
-      const conf = new Configuration ( Fixtures.options () );
+  //     const conf = new Configuration ( Fixtures.options () );
 
-      t.throws ( () => {
-        conf.extend ( 'ext.test', { defaults: {}, schema: { type: 'invalid' } } );
-      }, /namespace is invalid/ );
+  //     t.throws ( () => {
+  //       conf.extend ( 'ext.test', { defaults: {}, schema: { type: 'invalid' } } );
+  //     }, /namespace is invalid/ );
 
-    });
+  //   });
 
-    it ( 'throws an error if the schema would be incompatible with existing types', t => {
+  //   it ( 'throws an error if the schema would be incompatible with existing types', t => {
 
-      const conf = new Configuration ( Fixtures.options () );
+  //     const conf = new Configuration ( Fixtures.options () );
 
-      t.throws ( () => {
-        conf.extend ( 'ext.test', { defaults: {}, schema: { type: 'boolean' } } );
-        conf.extend ( 'ext.test.foo', { defaults: {}, schema: { type: 'boolean' } } );
-      }, /incompatible with the existing schema/ );
+  //     t.throws ( () => {
+  //       conf.extend ( 'ext.test', { defaults: {}, schema: { type: 'boolean' } } );
+  //       conf.extend ( 'ext.test.foo', { defaults: {}, schema: { type: 'boolean' } } );
+  //     }, /incompatible with the existing schema/ );
 
-    });
+  //   });
 
-  });
+  // });
 
   describe ( 'refresh', it => {
 

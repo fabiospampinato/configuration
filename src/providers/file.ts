@@ -2,87 +2,43 @@
 /* IMPORT */
 
 import type {WriteOptions} from 'atomically/dist/types';
-import type {FSWatcher, ProviderFileOptions} from '../types';
+import type {Encoding, FSWatcher, ProviderFileOptions} from '../types';
 import File from '../utils/file';
-import ProviderMemory from './memory';
+import ProviderAbstractFile from './abstract_file';
 
 /* MAIN */
 
-class ProviderFile<Options extends ProviderFileOptions = ProviderFileOptions> extends ProviderMemory<Options> {
-
-  /* MAIN */
-
-  path?: string;
-  watching: boolean;
-  watcher?: FSWatcher;
-  writeOptions?: WriteOptions;
-  writeSyncOptions?: WriteOptions;
-
-  /* CONSTRUCTOR */
-
-  constructor ( options: Partial<Options> ) {
-
-    super ( options );
-
-    this.watching = !!options.watch;
-    this.writeOptions = options.writeOptions;
-    this.writeSyncOptions = options.writeSyncOptions;
-
-    this.swap ( options.path, true );
-
-  }
+class ProviderFile<Options extends ProviderFileOptions = ProviderFileOptions> extends ProviderAbstractFile<Options> {
 
   /* API */
 
-  dispose (): void {
+  fileRead ( filePath: string, encoding: Encoding ): Promise<string> {
 
-    this.unwatch ();
-
-  }
-
-  swap ( path?: string, _initial: boolean = false ): void {
-
-    if ( path === this.path ) return;
-
-    this.dispose ();
-
-    this.path = path;
-
-    this.init ();
-
-    if ( !_initial ) this.triggerChange ();
-
-    if ( this.watching ) this.watch ();
+    return File.read ( filePath, encoding );
 
   }
 
-  watch (): void {
+  fileReadSync ( filePath: string, encoding: Encoding ): string {
 
-    if ( !this.path ) return;
-
-    const path = this.path;
-
-    this.watcher = File.watch ( path, async () => {
-
-      const {dataRaw} = await this.read ();
-
-      if ( path !== this.path ) return;
-
-      if ( this.isEqual ( dataRaw ) ) return;
-
-      super.write ( dataRaw, true );
-
-    });
+    return File.readSync ( filePath, encoding );
 
   }
 
-  unwatch (): void {
+  fileWrite ( filePath: string, data: string, options?: WriteOptions ): Promise<void> {
 
-    if ( !this.watcher ) return;
+    return File.write ( filePath, data, options );
 
-    this.watcher.close ();
+  }
 
-    delete this.watcher;
+  fileWriteSync ( filePath: string, data: string, options?: WriteOptions ): void {
+
+    return File.writeSync ( filePath, data, options );
+
+  }
+
+  fileWatch ( filePath: string, callback: Function ): FSWatcher {
+
+    return File.watch ( filePath, callback );
 
   }
 

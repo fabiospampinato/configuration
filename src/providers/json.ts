@@ -1,85 +1,44 @@
 
 /* IMPORT */
 
-import cloneDeep from 'plain-object-clone';
-import type {Data, DataRaw, DataUpdate, ProviderJSONOptions} from '../types';
+import type {WriteOptions} from 'atomically/dist/types';
+import type {Encoding, FSWatcher, ProviderJSONOptions} from '../types';
 import File from '../utils/file';
-import PathProp from '../utils/pp';
-import ProviderFile from './file';
+import ProviderAbstractJSON from './abstract_json';
 
 /* MAIN */
 
-//TODO: preserve the existing path keys instead of modifying them
-
-class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> extends ProviderFile<Options> {
+class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> extends ProviderAbstractJSON<Options> {
 
   /* API */
 
-  async read (): Promise<DataUpdate> {
+  fileRead ( filePath: string, encoding: Encoding ): Promise<string> {
 
-    if ( !this.path ) return super.read ();
-
-    try {
-
-      const dataRaw = await File.read ( this.path, { encoding: 'utf8' } ) ?? this.defaultsRaw;
-      const data = PathProp.unflat ( this.dataParser.parse ( dataRaw ) ?? this.defaults );
-
-      return {data, dataRaw};
-
-    } catch {
-
-      return {
-        data: cloneDeep ( this.defaults ),
-        dataRaw: this.defaultsRaw
-      };
-
-    }
+    return File.read ( filePath, encoding );
 
   }
 
-  readSync (): DataUpdate {
+  fileReadSync ( filePath: string, encoding: Encoding ): string {
 
-    if ( !this.path ) return super.readSync ();
-
-    try {
-
-      const dataRaw = File.readSync ( this.path, { encoding: 'utf8' } ) ?? this.defaultsRaw;
-      const data = PathProp.unflat ( this.dataParser.parse ( dataRaw ) ?? this.defaults );
-
-      return {data, dataRaw};
-
-    } catch {
-
-      return {
-        data: cloneDeep ( this.defaults ),
-        dataRaw: this.defaultsRaw
-      };
-
-    }
+    return File.readSync ( filePath, encoding );
 
   }
 
-  async write ( data: Data | DataRaw, force: boolean = false ): Promise<void> {
+  fileWrite ( filePath: string, data: string, options?: WriteOptions ): Promise<void> {
 
-    if ( !this.path ) return super.write ( data, force );
-
-    if ( !force && this.isEqual ( data ) ) return;
-
-    await super.write ( data, true );
-
-    File.write ( this.path, this.dataRaw, this.writeOptions );
+    return File.write ( filePath, data, options );
 
   }
 
-  writeSync ( data: Data | DataRaw, force: boolean = false ): void {
+  fileWriteSync ( filePath: string, data: string, options?: WriteOptions ): void {
 
-    if ( !this.path ) return super.writeSync ( data, force );
+    return File.writeSync ( filePath, data, options );
 
-    if ( !force && this.isEqual ( data ) ) return;
+  }
 
-    super.writeSync ( data, true );
+  fileWatch ( filePath: string, callback: Function ): FSWatcher {
 
-    File.writeSync ( this.path, this.dataRaw, this.writeSyncOptions );
+    return File.watch ( filePath, callback );
 
   }
 

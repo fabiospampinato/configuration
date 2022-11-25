@@ -6,6 +6,8 @@ import type {JSONSchema7} from 'json-schema';
 
 /* MAIN */
 
+type Encoding = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'utf16le' | 'ucs2' | 'ucs-2';
+
 type Scope = string;
 type ScopeAll = '*';
 
@@ -96,4 +98,4 @@ type ProviderStorageOptions = ProviderAbstractOptions & {
 
 /* EXPORT */
 
-export type {Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, ExtendData, Value, ValueArray, ValueObject, Schema, Filterer, FiltererWrapper, ChangeHandler, ChangeHandlerData, Disposer, FSWatcher, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};
+export type {Encoding, Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, ExtendData, Value, ValueArray, ValueObject, Schema, Filterer, FiltererWrapper, ChangeHandler, ChangeHandlerData, Disposer, FSWatcher, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};
