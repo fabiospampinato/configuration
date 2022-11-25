@@ -4,7 +4,7 @@
 import type {WriteOptions} from 'atomically/dist/types';
 import type {JSONSchema7} from 'json-schema';
 
-/* TYPES */
+/* MAIN */
 
 type Scope = string;
 type ScopeAll = '*';

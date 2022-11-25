@@ -1,11 +1,11 @@
 
 /* IMPORT */
 
-const {default: Configuration} = require ( '../dist' ),
-      {default: ProviderMemory} = require ( '../dist/providers/memory' ),
-      {Fixtures} = require ( '../test/fixtures' ),
-      AJV = require ( '../test/ajv' ),
-      benchmark = require ( 'benchloop' );
+import Configuration from '../dist/index.js';
+import ProviderMemory from '../dist/providers/memory.js';
+import {Fixtures} from '../test/fixtures.js';
+import AJV from '../test/ajv.js';
+import benchmark from 'benchloop';
 
 /* HELPERS */
 
@@ -81,18 +81,18 @@ benchmark ({
   }
 });
 
-benchmark ({
-  name: 'extend',
-  iterations: 100,
-  fn: ctx => {
-    ctx.conf.extend ( 'ext.test', {
-      defaults: {},
-      schema: {
-        type: 'object'
-      }
-    });
-  }
-});
+// benchmark ({
+//   name: 'extend',
+//   iterations: 100,
+//   fn: ctx => {
+//     ctx.conf.extend ( 'ext.test', {
+//       defaults: {},
+//       schema: {
+//         type: 'object'
+//       }
+//     });
+//   }
+// });
 
 benchmark ({
   name: 'refresh',
