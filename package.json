@@ -50,31 +50,31 @@
   },
   "typesVersions": {
     "*": {
-      "./abstract": [
+      "abstract": [
         "./dist/abstract.d.ts"
       ],
-      "./abstract-file": [
+      "abstract-file": [
         "./dist/providers/abstract_file.d.ts"
       ],
-      "./abstract-json": [
+      "abstract-json": [
         "./dist/providers/abstract_json.d.ts"
       ],
-      "./file": [
+      "file": [
         "./dist/providers/file.d.ts"
       ],
-      "./json": [
+      "json": [
         "./dist/providers/json.d.ts"
       ],
-      "./memory": [
+      "memory": [
         "./dist/providers/memory.d.ts"
       ],
-      "./storage": [
+      "storage": [
         "./dist/providers/storage.d.ts"
       ],
-      "./local-storage": [
+      "local-storage": [
         "./dist/providers/local_storage.d.ts"
       ],
-      "./session-storage": [
+      "session-storage": [
         "./dist/providers/session_storage.d.ts"
       ]
     }
