@@ -6,8 +6,79 @@
   "type": "module",
   "sideEffects": false,
   "main": "dist/index.js",
-  "exports": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./abstract": {
+      "import": "./dist/abstract.js",
+      "types": "./dist/abstract.d.ts"
+    },
+    "./abstract-file": {
+      "import": "./dist/providers/abstract_file.js",
+      "types": "./dist/providers/abstract_file.d.ts"
+    },
+    "./abstract-json": {
+      "import": "./dist/providers/abstract_json.js",
+      "types": "./dist/providers/abstract_json.d.ts"
+    },
+    "./file": {
+      "import": "./dist/providers/file.js",
+      "types": "./dist/providers/file.d.ts"
+    },
+    "./json": {
+      "import": "./dist/providers/json.js",
+      "types": "./dist/providers/json.d.ts"
+    },
+    "./memory": {
+      "import": "./dist/providers/memory.js",
+      "types": "./dist/providers/memory.d.ts"
+    },
+    "./storage": {
+      "import": "./dist/providers/storage.js",
+      "types": "./dist/providers/storage.d.ts"
+    },
+    "./local-storage": {
+      "import": "./dist/providers/local_storage.js",
+      "types": "./dist/providers/local_storage.d.ts"
+    },
+    "./session-storage": {
+      "import": "./dist/providers/session_storage.js",
+      "types": "./dist/providers/session_storage.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "./abstract": [
+        "./dist/abstract.d.ts"
+      ],
+      "./abstract-file": [
+        "./dist/providers/abstract_file.d.ts"
+      ],
+      "./abstract-json": [
+        "./dist/providers/abstract_json.d.ts"
+      ],
+      "./file": [
+        "./dist/providers/file.d.ts"
+      ],
+      "./json": [
+        "./dist/providers/json.d.ts"
+      ],
+      "./memory": [
+        "./dist/providers/memory.d.ts"
+      ],
+      "./storage": [
+        "./dist/providers/storage.d.ts"
+      ],
+      "./local-storage": [
+        "./dist/providers/local_storage.d.ts"
+      ],
+      "./session-storage": [
+        "./dist/providers/session_storage.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "benchmark": "tsex benchmark",
     "benchmark:watch": "tsex benchmark --watch",
