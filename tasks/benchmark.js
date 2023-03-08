@@ -23,9 +23,8 @@ function getConf () {
 
 /* BENCHMARK */
 
-benchmark.defaultOptions = Object.assign ( benchmark.defaultOptions, {
-  iterations: 5000,
-  log: 'compact',
+benchmark.config ({
+  iterations: 5_000,
   beforeEach: ctx => {
     ctx.conf = getConf ();
   },

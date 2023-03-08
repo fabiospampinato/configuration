@@ -110,7 +110,7 @@
     "@types/node": "^18.11.9",
     "ajv": "^6.12.2",
     "ajv-filter": "^1.1.1",
-    "benchloop": "^2.0.0",
+    "benchloop": "^2.1.0",
     "fava": "^0.2.0",
     "lodash": "^4.17.21",
     "tempy": "^0.5.0",
