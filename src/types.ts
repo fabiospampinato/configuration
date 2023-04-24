@@ -45,7 +45,7 @@ type ExtendData = {
   schema?: Schema
 };
 
-type ChangeHandler = ( value: Value | undefined, valuePrev: Value | undefined ) => void;
+type ChangeHandler = (( value: Value | undefined, valuePrev: Value | undefined ) => void) | (() => void);
 type ChangeHandlerData = {
   callback: ChangeHandler,
   getter: () => Value | undefined,

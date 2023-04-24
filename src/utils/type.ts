@@ -9,21 +9,27 @@ const Type = {
 
   /* API */
 
-  isNull ( value: unknown ): value is null {
-
-    return value === null;
-
-  },
-
   isArray ( value: unknown ): value is unknown[] {
 
     return Array.isArray ( value );
 
   },
 
-  isObject ( x: unknown ): x is ValueArray | ValueObject {
+  isNull ( value: unknown ): value is null {
 
-    return !Type.isPrimitive ( x );
+    return value === null;
+
+  },
+
+  isNullary ( value: unknown ): value is (() => unknown) {
+
+    return typeof value === 'function' && value.length === 0;
+
+  },
+
+  isObject ( value: unknown ): value is ValueArray | ValueObject {
+
+    return !Type.isPrimitive ( value );
 
   },
 
@@ -37,15 +43,15 @@ const Type = {
 
   },
 
-  isString ( x: unknown ): x is string {
+  isString ( value: unknown ): value is string {
 
-    return typeof x === 'string';
+    return typeof value === 'string';
 
   },
 
-  isUndefined ( x: unknown ): x is undefined {
+  isUndefined ( value: unknown ): value is undefined {
 
-    return typeof x === 'undefined';
+    return typeof value === 'undefined';
 
   }
 

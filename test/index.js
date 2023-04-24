@@ -895,6 +895,27 @@ describe ( 'Configuration', () => {
 
     });
 
+    it ( 'calls a function when anything changes', t => {
+
+      let tests = 0;
+
+      const conf = new Configuration ( Fixtures.options () );
+
+      conf.onChange ( () => {
+        tests++;
+      });
+
+      t.is ( conf.handlers.length, 1 );
+
+      conf.set ( 'local', 'core.foo', 'test' );
+      conf.set ( 'local', 'core.foo', 'test' );
+      conf.set ( 'global', 'core.foo', 'test' );
+      conf.set ( 'global', 'conf', _.cloneDeep ( conf.get ( 'global', 'core' ) ) );
+
+      t.is ( tests, 3 );
+
+    });
+
     it ( 'returns a disposer', t => {
 
       const conf = new Configuration ( Fixtures.options () );

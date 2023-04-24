@@ -400,13 +400,21 @@ class Configuration {
       const data = this.handlers[i];
       const value = data.getter ();
 
-      if ( isEqual ( data.value, value ) ) continue;
+      if ( Type.isNullary ( data.callback ) ) { //TODO: This is not exactly correct, something might have been changed while the flattened configuration could still be the same, but it's much faster
 
-      const clone = Type.isPrimitive ( value ) ? value : cloneDeep ( value );
+        data.callback ();
 
-      data.callback ( clone, data.value );
+      } else {
 
-      data.value = clone;
+        if ( isEqual ( data.value, value ) ) continue;
+
+        const clone = Type.isPrimitive ( value ) ? value : cloneDeep ( value );
+
+        data.callback ( clone, data.value );
+
+        data.value = clone;
+
+      }
 
     }
 
@@ -425,7 +433,7 @@ class Configuration {
     const callback = args[args.length - 1];
     const getter = () => this.get.apply ( this, getterArgs );
     const valueRaw = getter ();
-    const value = Type.isPrimitive ( valueRaw ) ? valueRaw : cloneDeep ( valueRaw );
+    const value = !Type.isNullary ( callback ) ? ( Type.isPrimitive ( valueRaw ) ? valueRaw : cloneDeep ( valueRaw ) ) : undefined;
     const data: ChangeHandlerData = {callback, getter, value};
 
     handlers[handlers.length] = data;
