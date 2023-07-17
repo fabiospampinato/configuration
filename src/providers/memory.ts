@@ -27,7 +27,7 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
   }
 
-  async write ( data: Data | DataRaw, force: boolean = false ): Promise<void> { //TODO: Optimize calls to this, which may cause files to be written to disk unnecessarily
+  async write ( data: Data | DataRaw, force: boolean = false ): Promise<void> {
 
     return this.writeSync ( data, force );
 

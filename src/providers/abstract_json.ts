@@ -60,11 +60,11 @@ abstract class ProviderAbstractJSON<Options extends ProviderJSONOptions = Provid
 
   async write ( data: Data | DataRaw, force: boolean = false ): Promise<void> {
 
-    if ( !this.path ) return super.write ( data, force );
+    if ( !this.path ) return super.writeSync ( data, force );
 
     if ( !force && this.isEqual ( data ) ) return;
 
-    await super.write ( data, true );
+    super.writeSync ( data, true );
 
     this.fileWrite ( this.path, this.dataRaw, this.writeOptions );
 
