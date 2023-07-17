@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import type {WriteOptions} from 'atomically/dist/types';
-import type {Encoding, FSWatcher, ProviderJSONOptions} from '../types';
+import type {Callback, Disposer, Encoding, ProviderJSONOptions} from '../types';
 import File from '../utils/file';
 import ProviderAbstractJSON from './abstract_json';
 
@@ -10,7 +10,7 @@ import ProviderAbstractJSON from './abstract_json';
 
 class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> extends ProviderAbstractJSON<Options> {
 
-  /* API */
+  /* PUBLIC API */
 
   fileRead ( filePath: string, encoding: Encoding ): Promise<string> {
 
@@ -36,7 +36,7 @@ class ProviderJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> ex
 
   }
 
-  fileWatch ( filePath: string, callback: Function ): FSWatcher {
+  fileWatch ( filePath: string, callback: Callback ): Disposer {
 
     return File.watch ( filePath, callback );
 

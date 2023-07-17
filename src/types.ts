@@ -2,7 +2,6 @@
 /* IMPORT */
 
 import type {WriteOptions} from 'atomically/dist/types';
-import type {JSONSchema7} from 'json-schema';
 
 /* MAIN */
 
@@ -25,7 +24,7 @@ type DataUpdate = {
 };
 
 type DataParser = {
-  parse: ( raw: DataRaw ) => Data | undefined,
+  parse: ( dataRaw: DataRaw ) => Data | undefined,
   stringify: ( data: Data, dataRawPrev?: DataRaw ) => DataRaw | undefined
 };
 
@@ -34,16 +33,7 @@ type ValuePrimitive = null | undefined | boolean | number | string;
 type ValueArray = Array<Value>;
 type ValueObject = { [key: string]: Value };
 
-type Schema = JSONSchema7;
-
-type Filterer = ( value: Data, schema?: Schema ) => Data;
-
-type FiltererWrapper = ( value: Data ) => Data;
-
-type ExtendData = {
-  defaults?: Data,
-  schema?: Schema
-};
+type Filter = ( value: Data ) => Data;
 
 type ChangeHandler = (( value: Value | undefined, valuePrev: Value | undefined ) => void) | (() => void);
 type ChangeHandlerData = {
@@ -52,18 +42,15 @@ type ChangeHandlerData = {
   value: Value | undefined
 };
 
-type Disposer = () => void;
+type Callback = () => void;
 
-type FSWatcher = {
-  close: () => void
-};
+type Disposer = () => void;
 
 type Options = {
   providers: Provider[],
   defaults: Data,
-  schema: Schema,
-  filterer: Filterer,
-  scope: Scope
+  filter?: Filter,
+  scope?: Scope
 };
 
 /* PROVIDERS TYPES */
@@ -96,6 +83,14 @@ type ProviderStorageOptions = ProviderAbstractOptions & {
   storage: Storage
 };
 
+type ProviderLocalStorageOptions = ProviderAbstractOptions & {
+  id: string
+};
+
+type ProviderSessionStorageOptions = ProviderAbstractOptions & {
+  id: string
+};
+
 /* EXPORT */
 
-export type {Encoding, Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, ExtendData, Value, ValueArray, ValueObject, Schema, Filterer, FiltererWrapper, ChangeHandler, ChangeHandlerData, Disposer, FSWatcher, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions};
+export type {Encoding, Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, Value, ValueArray, ValueObject, Filter, ChangeHandler, ChangeHandlerData, Callback, Disposer, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions, ProviderLocalStorageOptions, ProviderSessionStorageOptions};

@@ -1,4 +1,0 @@
-
-☐ somehow preserve comments in `dataRaw` when editing `data` via the APIs
-  ☐ edit `dataRaw` directly when possible
-☐ add support for extending without providing a namespace

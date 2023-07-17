@@ -1,18 +1,18 @@
 
 /* IMPORT */
 
-import cloneDeep from 'plain-object-clone';
 import type {Data, DataRaw, DataUpdate, ProviderJSONOptions} from '../types';
+import Lang from '../utils/lang';
 import PathProp from '../utils/pp';
 import ProviderAbstractFile from './abstract_file';
 
 /* MAIN */
 
-//TODO: preserve the existing path keys instead of modifying them
+//TODO: Preserve the existing path keys instead of modifying them
 
 abstract class ProviderAbstractJSON<Options extends ProviderJSONOptions = ProviderJSONOptions> extends ProviderAbstractFile<Options> {
 
-  /* API */
+  /* PUBLIC API */
 
   async read (): Promise<DataUpdate> {
 
@@ -28,7 +28,7 @@ abstract class ProviderAbstractJSON<Options extends ProviderJSONOptions = Provid
     } catch {
 
       return {
-        data: cloneDeep ( this.defaults ),
+        data: Lang.cloneDeep ( this.defaults ),
         dataRaw: this.defaultsRaw
       };
 
@@ -50,7 +50,7 @@ abstract class ProviderAbstractJSON<Options extends ProviderJSONOptions = Provid
     } catch {
 
       return {
-        data: cloneDeep ( this.defaults ),
+        data: Lang.cloneDeep ( this.defaults ),
         dataRaw: this.defaultsRaw
       };
 

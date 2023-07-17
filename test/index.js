@@ -1,16 +1,16 @@
 
 /* IMPORT */
 
-import _ from 'lodash';
+import isEqual from 'are-deeply-equal';
+import {cloneDeep} from 'duper';
 import {describe} from 'fava';
 import fs from 'node:fs';
 import {setTimeout as delay} from 'node:timers/promises';
-import tempy from 'tempy';
+import {temporaryFile} from 'tempy';
 import Configuration from '../dist/index.js';
 import ProviderJSON from '../dist/providers/json.js';
 import ProviderMemory from '../dist/providers/memory.js';
 import {Fixtures, FixturesArray} from './fixtures.js';
-import AJV from './ajv.js';
 
 /* MAIN */
 
@@ -29,7 +29,7 @@ describe ( 'Configuration', () => {
       t.is ( conf.scopes.local, conf.providers[0] );
       t.is ( conf.scopes.global, conf.providers[1] );
       t.is ( conf.handlers.length, 0 );
-      t.true ( !!conf.dataSchema );
+      t.true ( !!conf.data );
 
     });
 
@@ -51,7 +51,7 @@ describe ( 'Configuration', () => {
 
     it ( 'supports custom defaults', t => {
 
-      const conf = new Configuration ( Fixtures.options ({ defaults: { core: { bar: 'custom' } }, defaultsRaw: '{ // Custom }' }) );
+      const conf = new Configuration ( Fixtures.options ({ defaults: { core: { bar: 'custom' } }, defaultsRaw: '{ // Custom\n }' }) );
 
       t.is ( conf.get ( 'global', 'core.bar' ), 'global' );
 
@@ -63,31 +63,31 @@ describe ( 'Configuration', () => {
       conf.scopes.global.writeSync ({ toJSON: () => { throw new Error ( 'Unstringifiable') } }); // Unstringifiable data, forcing the use of defaults
 
       t.is ( conf.get ( 'global', 'core.bar' ), undefined );
-      t.is ( conf.scopes.global.dataRaw, '{ // Custom }' );
+      t.is ( conf.scopes.global.dataRaw, '{ // Custom\n }' );
 
     });
 
     it ( 'supports custom flattened defaults (scope)', t => {
 
-      const conf = new Configuration ({ providers: [new ProviderMemory ()], defaults: { 'core.bar': 'custom' }, filterer: AJV.filterer });
+      const conf = new Configuration ({ providers: [new ProviderMemory ({ scope: 'local' })], defaults: { 'core.bar': 'custom' }, filter: Fixtures.filter });
 
-      t.true ( _.isEqual ( conf.scopes.defaults.data, { core: { bar: 'custom' } } ) );
+      t.true ( isEqual ( conf.scopes.defaults.data, { core: { bar: 'custom' } } ) );
 
     });
 
     it ( 'supports custom flattened defaults (provider+object)', t => {
 
-      const conf = new Configuration ({ providers: [new ProviderMemory ({ defaults: { 'core.foo': 'custom' } })], filterer: AJV.filterer });
+      const conf = new Configuration ({ providers: [new ProviderMemory ({ scope: 'local', defaults: { 'core.foo': 'custom' } })], defaults: {}, filter: Fixtures.filter });
 
-      t.true ( _.isEqual ( conf.scopes.provider.data, { core: { foo: 'custom' } } ) );
+      t.true ( isEqual ( conf.scopes.local.data, { core: { foo: 'custom' } } ) );
 
     });
 
     it ( 'supports custom flattened defaults (provider+string)', t => {
 
-      const conf = new Configuration ({ providers: [new ProviderMemory ({ defaultsRaw: `{ "core.foo": "custom" }` })], filterer: AJV.filterer });
+      const conf = new Configuration ({ providers: [new ProviderMemory ({ scope: 'local', defaultsRaw: `{ "core.foo": "custom" }` })], defaults: {}, filter: Fixtures.filter });
 
-      t.true ( _.isEqual ( conf.scopes.provider.data, { core: { foo: 'custom' } } ) );
+      t.true ( isEqual ( conf.scopes.local.data, { core: { foo: 'custom' } } ) );
 
     });
 
@@ -135,164 +135,21 @@ describe ( 'Configuration', () => {
 
   });
 
-  // describe.skip ( 'extend', it => { //FIXME
-
-  //   it ( 'adds a namespace', t => {
-
-  //     const conf = new Configuration ( Fixtures.options () );
-
-  //     conf.extend ( 'ext.test', {
-  //       defaults: {
-  //         foo: 'foo',
-  //         bar: 123
-  //       },
-  //       schema: {
-  //         type: 'object',
-  //         properties: {
-  //           foo: {
-  //             type: 'string'
-  //           },
-  //           bar: {
-  //             type: 'number'
-  //           },
-  //           baz: {
-  //             type: 'string'
-  //           }
-  //         }
-  //       }
-  //     });
-
-  //     t.is ( conf.get ( 'ext.test.foo' ), 'foo' );
-  //     t.is ( conf.get ( 'ext.test.bar' ), 123 );
-  //     t.is ( conf.get ( 'ext.test.baz' ), undefined );
-
-  //     conf.set ( 'ext.test.baz', 'test' );
-
-  //     t.is ( conf.get ( 'ext.test.baz' ), 'test' );
-
-  //   });
-
-  //   it ( 'returns a disposer which removes the namespace', t => {
-
-  //     const conf = new Configuration ( Fixtures.options () );
-
-  //     const disposer = conf.extend ( 'ext.test', {
-  //       defaults: {
-  //         foo: 'foo',
-  //         bar: 123
-  //       },
-  //       schema: {
-  //         type: 'object',
-  //         properties: {
-  //           foo: {
-  //             type: 'string'
-  //           },
-  //           bar: {
-  //             type: 'number'
-  //           },
-  //           baz: {
-  //             type: 'string'
-  //           }
-  //         }
-  //       }
-  //     });
-
-  //     disposer ();
-
-  //     t.is ( conf.get ( 'ext.test.foo' ), undefined );
-  //     t.is ( conf.get ( 'ext.test.bar' ), undefined );
-  //     t.is ( conf.get ( 'ext.test.baz' ), undefined );
-  //     t.is ( conf.get ( 'ext.test' ), undefined );
-
-  //     t.is ( _.get ( conf.schema, 'properties.ext.properties.test' ), undefined );
-
-  //   });
-
-  //   it ( 'supports flattened objects', t => {
-
-  //     const conf = new Configuration ( Fixtures.options () );
-
-  //     conf.extend ( 'flattened', {
-  //       defaults: {
-  //         'foo.bar': 'string'
-  //       },
-  //       schema: {
-  //         type: 'object',
-  //         properties: {
-  //           foo: {
-  //             type: 'object',
-  //             properties: {
-  //               bar: {
-  //                 type: 'string'
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     });
-
-  //     t.is ( conf.get ( 'flattened.foo.bar' ), 'string' );
-
-  //   });
-
-  //   it ( 'throws an error if the namespace is already in use', t => {
-
-  //     const conf = new Configuration ( Fixtures.options () );
-
-  //     t.throws ( () => {
-  //       conf.extend ( 'core', {} );
-  //     }, /already in use/ );
-
-  //   });
-
-  //   it ( 'throws an error if the schema is missing when validation is enabled', t => {
-
-  //     const conf = new Configuration ( Fixtures.options () );
-
-  //     t.throws ( () => {
-  //       conf.extend ( 'ext.test', {} );
-  //     }, /You need to provide a schema/ );
-
-  //   });
-
-  //   it ( 'throws an error if the schema is invalid', t => {
-
-  //     const conf = new Configuration ( Fixtures.options () );
-
-  //     t.throws ( () => {
-  //       conf.extend ( 'ext.test', { defaults: {}, schema: { type: 'invalid' } } );
-  //     }, /namespace is invalid/ );
-
-  //   });
-
-  //   it ( 'throws an error if the schema would be incompatible with existing types', t => {
-
-  //     const conf = new Configuration ( Fixtures.options () );
-
-  //     t.throws ( () => {
-  //       conf.extend ( 'ext.test', { defaults: {}, schema: { type: 'boolean' } } );
-  //       conf.extend ( 'ext.test.foo', { defaults: {}, schema: { type: 'boolean' } } );
-  //     }, /incompatible with the existing schema/ );
-
-  //   });
-
-  // });
-
   describe ( 'refresh', it => {
 
     it ( 'updates the current data', t => {
 
       const conf = new Configuration ( Fixtures.options () );
-      const dataPrev = _.cloneDeep ( conf.get () );
+      const dataPrev = cloneDeep ( conf.get () );
 
-      conf.scopes.global.dataSchema = {};
+      conf.scopes.global.dataFiltered = {};
 
       t.is ( conf.get ( 'core.bar' ), 'global' );
 
       conf.refresh ();
 
       t.is ( conf.get ( 'core.bar' ), 'defaults' );
-      t.false ( _.isEqual ( conf.get (), dataPrev ) );
+      t.false ( isEqual ( conf.get (), dataPrev ) );
 
     });
 
@@ -305,20 +162,20 @@ describe ( 'Configuration', () => {
         { foo: 'defaults2' },
         { foo: 'global', arr: [1, 2, 3] },
         { foo: 'local' },
-        { foo: 'local', arr: undefined } //FIXME: `arr` here should not exist at all
+        { foo: 'local', arr: [] }
       ];
 
-      t.true ( _.isEqual ( conf.get (), dataExpected ) );
+      t.true ( isEqual ( conf.get (), dataExpected ) );
 
     });
 
-    it ( 'doesn\'t mutate each provider data', t => {
+    it ( 'does not mutate each provider data', t => {
 
       const conf = new Configuration ( Fixtures.options () );
 
-      conf.scopes.global.dataSchema.core.test = true;
+      conf.scopes.global.dataFiltered.core.test = true;
 
-      const datasPrev = conf.providers.map ( provider => _.cloneDeep ( provider.dataSchema ) );
+      const datasPrev = conf.providers.map ( provider => cloneDeep ( provider.dataFiltered ) );
 
       t.is ( conf.get ( 'core.test' ), undefined );
 
@@ -326,10 +183,10 @@ describe ( 'Configuration', () => {
 
       t.is ( conf.get ( 'core.test' ), true );
 
-      const datas = conf.providers.map ( provider => _.cloneDeep ( provider.dataSchema ) );
+      const datas = conf.providers.map ( provider => cloneDeep ( provider.dataFiltered ) );
 
       datasPrev.forEach ( ( prev, index ) => {
-        t.true ( _.isEqual ( prev, datas[index] ) );
+        t.true ( isEqual ( prev, datas[index] ) );
       });
 
     });
@@ -342,7 +199,7 @@ describe ( 'Configuration', () => {
 
       const conf = new Configuration ( Fixtures.options () );
 
-      t.is ( conf.get (), conf.dataSchema );
+      t.is ( conf.get (), conf.data );
 
     });
 
@@ -352,7 +209,7 @@ describe ( 'Configuration', () => {
       const datas = conf.get ( '*' );
 
       conf.providers.forEach ( ( provider, index ) => {
-        t.is ( datas[provider.scope], provider.dataSchema );
+        t.is ( datas[provider.scope], provider.dataFiltered );
       });
 
     });
@@ -449,7 +306,7 @@ describe ( 'Configuration', () => {
 
       const conf = new Configuration ( Fixtures.options () );
 
-      conf.dataSchema.none = undefined;
+      conf.data.none = undefined;
 
       t.false ( conf.has ( 'none' ) );
 
@@ -674,9 +531,9 @@ describe ( 'Configuration', () => {
 
       const datas = conf.get ( '*' );
 
-      t.false ( _.isEqual ( datas.defaults, {} ) );
-      t.true ( _.isEqual ( datas.local, {} ) );
-      t.true ( _.isEqual ( datas.global, {} ) );
+      t.false ( isEqual ( datas.defaults, {} ) );
+      t.true ( isEqual ( datas.local, {} ) );
+      t.true ( isEqual ( datas.global, {} ) );
 
     });
 
@@ -686,7 +543,7 @@ describe ( 'Configuration', () => {
 
       conf.update ( 'global', {} );
 
-      t.true ( _.isEqual ( conf.get ( '*' ).global, {} ) );
+      t.true ( isEqual ( conf.get ( '*' ).global, {} ) );
 
     });
 
@@ -696,7 +553,7 @@ describe ( 'Configuration', () => {
 
       conf.update ( {} );
 
-      t.true ( _.isEqual ( conf.get ( '*' ).global, {} ) );
+      t.true ( isEqual ( conf.get ( '*' ).global, {} ) );
 
     });
 
@@ -706,7 +563,7 @@ describe ( 'Configuration', () => {
 
       conf.update ( '{}' );
 
-      t.true ( _.isEqual ( conf.get ( '*' ).global, {} ) );
+      t.true ( isEqual ( conf.get ( '*' ).global, {} ) );
 
     });
 
@@ -716,7 +573,7 @@ describe ( 'Configuration', () => {
 
       conf.update ({});
 
-      t.true ( _.isEqual ( conf.get ( '*' ).global, {} ) );
+      t.true ( isEqual ( conf.get ( '*' ).global, {} ) );
 
     });
 
@@ -782,9 +639,9 @@ describe ( 'Configuration', () => {
 
       const datas = conf.get ( '*' );
 
-      t.false ( _.isEqual ( datas.defaults, {} ) );
-      t.true ( _.isEqual ( datas.local, {} ) );
-      t.true ( _.isEqual ( datas.global, {} ) );
+      t.false ( isEqual ( datas.defaults, {} ) );
+      t.true ( isEqual ( datas.local, {} ) );
+      t.true ( isEqual ( datas.global, {} ) );
 
     });
 
@@ -796,9 +653,9 @@ describe ( 'Configuration', () => {
 
       const datas = conf.get ( '*' );
 
-      t.false ( _.isEqual ( datas.defaults, {} ) );
-      t.true ( _.isEqual ( datas.local, {} ) );
-      t.true ( _.isEqual ( datas.global, {} ) );
+      t.false ( isEqual ( datas.defaults, {} ) );
+      t.true ( isEqual ( datas.local, {} ) );
+      t.true ( isEqual ( datas.global, {} ) );
 
     });
 
@@ -810,9 +667,9 @@ describe ( 'Configuration', () => {
 
       const datas = conf.get ( '*' );
 
-      t.false ( _.isEqual ( datas.defaults, {} ) );
-      t.false ( _.isEqual ( datas.local, {} ) );
-      t.true ( _.isEqual ( datas.global, {} ) );
+      t.false ( isEqual ( datas.defaults, {} ) );
+      t.false ( isEqual ( datas.local, {} ) );
+      t.true ( isEqual ( datas.global, {} ) );
 
     });
 
@@ -824,17 +681,17 @@ describe ( 'Configuration', () => {
 
       const datas = conf.get ( '*' );
 
-      t.true ( _.isEqual ( datas.defaults, [{ foo: 'defaults' }, { foo: 'defaults2' }] ) );
-      t.true ( _.isEqual ( datas.local, [{ foo: 'local' }, { foo: 'local', arr: undefined }] ) ); //FIXME: `arr` here should not exist at all
-      t.true ( _.isEqual ( datas.global, [] ) );
+      t.true ( isEqual ( datas.defaults, [{ foo: 'defaults' }, { foo: 'defaults2' }] ) );
+      t.true ( isEqual ( datas.local, [{ foo: 'local' }, { foo: 'local', arr: [] }] ) );
+      t.true ( isEqual ( datas.global, [] ) );
 
       conf.reset ();
 
       const datas2 = conf.get ( '*' );
 
-      t.true ( _.isEqual ( datas2.defaults, [{ foo: 'defaults' }, { foo: 'defaults2' }] ) );
-      t.true ( _.isEqual ( datas2.local, [] ) );
-      t.true ( _.isEqual ( datas2.global, [] ) );
+      t.true ( isEqual ( datas2.defaults, [{ foo: 'defaults' }, { foo: 'defaults2' }] ) );
+      t.true ( isEqual ( datas2.local, [] ) );
+      t.true ( isEqual ( datas2.global, [] ) );
 
     });
 
@@ -889,7 +746,7 @@ describe ( 'Configuration', () => {
       conf.set ( 'local', 'core.foo', 'test' );
       conf.set ( 'local', 'core.foo', 'test' );
       conf.set ( 'global', 'core.foo', 'test' );
-      conf.set ( 'global', 'conf', _.cloneDeep ( conf.get ( 'global', 'core' ) ) );
+      conf.set ( 'global', 'conf', cloneDeep ( conf.get ( 'global', 'core' ) ) );
 
       t.is ( tests, 3 );
 
@@ -910,7 +767,7 @@ describe ( 'Configuration', () => {
       conf.set ( 'local', 'core.foo', 'test' );
       conf.set ( 'local', 'core.foo', 'test' );
       conf.set ( 'global', 'core.foo', 'test' );
-      conf.set ( 'global', 'conf', _.cloneDeep ( conf.get ( 'global', 'core' ) ) );
+      conf.set ( 'global', 'conf', cloneDeep ( conf.get ( 'global', 'core' ) ) );
 
       t.is ( tests, 3 );
 
@@ -946,14 +803,13 @@ describe ( 'Configuration', () => {
       const options = {
         providers: [foo],
         defaults: Fixtures.defaults (),
-        schema: Fixtures.schema (),
-        filterer: AJV.filterer
+        filter: Fixtures.filter
       };
 
       const conf = new Configuration ( options );
 
       t.is ( conf.scopes.foo.watching, true );
-      t.is ( conf.scopes.foo.watcher, undefined );
+      t.is ( conf.scopes.foo.watcherDisposer, undefined );
 
       t.is ( conf.get ( 'core.foo' ), 'defaults' );
 
@@ -965,24 +821,26 @@ describe ( 'Configuration', () => {
 
       t.is ( conf.get ( 'core.foo' ), 'local' );
 
-      const tempPath = tempy.file ({ extension: 'json' });
+      const tempPath = temporaryFile ({ extension: 'json' });
 
       fs.writeFileSync ( tempPath, '{ "core": { "foo": "temp" } }' );
 
       foo.swap ( tempPath );
 
       t.is ( conf.scopes.foo.watching, true );
-      t.is ( !!conf.scopes.foo.watcher, true );
+      t.is ( !!conf.scopes.foo.watcherDisposer, true );
 
       t.is ( conf.get ( 'core.foo' ), 'temp' );
 
-      const tempPath2 = tempy.file ({ extension: 'json' });
+      const tempPath2 = temporaryFile ({ extension: 'json' });
 
       fs.writeFileSync ( tempPath2, '{ "core": { "foo": "temp2" } }' );
 
       foo.swap ( tempPath2 );
 
       t.is ( conf.get ( 'core.foo' ), 'temp2' );
+
+      conf.dispose ();
 
     });
 
@@ -994,7 +852,7 @@ describe ( 'Configuration', () => {
 
       const foo = new ProviderJSON ({
         scope: 'foo',
-        path: tempy.file ({ extension: 'json' }),
+        path: temporaryFile ({ extension: 'json' }),
         watch: false
       });
 
@@ -1003,8 +861,7 @@ describe ( 'Configuration', () => {
       const options = {
         providers: [foo],
         defaults: Fixtures.defaults (),
-        schema: Fixtures.schema (),
-        filterer: AJV.filterer
+        filter: Fixtures.filter
       };
 
       const conf = new Configuration ( options );
@@ -1018,9 +875,7 @@ describe ( 'Configuration', () => {
 
       const conf = new Configuration ( Fixtures.options ({ watch: true }) );
 
-      // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
-
-      await delay ( 3500 );
+      await delay ( 500 );
 
       fs.writeFileSync ( conf.scopes.global.path, JSON.stringify ({
         core: {
@@ -1029,10 +884,12 @@ describe ( 'Configuration', () => {
         }
       }));
 
-      await delay ( 3500 );
+      await delay ( 1500 );
 
       t.is ( conf.get ( 'core.bar' ), 'custom' );
       t.is ( conf.get ( 'core.test' ), undefined );
+
+      conf.dispose ();
 
     });
 
@@ -1040,16 +897,16 @@ describe ( 'Configuration', () => {
 
       const conf = new Configuration ( Fixtures.options ({ watch: true }) );
 
-      // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
-
-      await delay ( 3500 );
+      await delay ( 500 );
 
       fs.writeFileSync ( conf.scopes.global.path, '{' );
 
-      await delay ( 3500 );
+      await delay ( 1500 );
 
       t.is ( conf.get ( 'core.bar' ), 'defaults' );
-      t.true ( _.isEqual ( conf.scopes.global.dataSchema, {} ) );
+      t.true ( isEqual ( conf.scopes.global.dataFiltered, {} ) );
+
+      conf.dispose ();
 
     });
 
@@ -1057,17 +914,17 @@ describe ( 'Configuration', () => {
 
       const conf = new Configuration ( Fixtures.options ({ watch: true }) );
 
-      // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
-
-      await delay ( 3500 );
+      await delay ( 500 );
 
       fs.writeFileSync ( conf.scopes.global.path, '' );
 
-      await delay ( 3500 );
+      await delay ( 1500 );
 
       t.is ( conf.get ( 'core.bar' ), 'defaults' );
       t.is ( conf.get ( 'core.test' ), undefined );
       t.is ( conf.scopes.global.dataRaw, '' );
+
+      conf.dispose ();
 
     });
 
@@ -1075,9 +932,7 @@ describe ( 'Configuration', () => {
 
       const conf = new Configuration ( Fixtures.options ({ watch: true }) );
 
-      // await new Promise ( resolve => conf.scopes.global.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
-
-      await delay ( 3500 );
+      await delay ( 500 );
 
       const dataNext = JSON.stringify ({
         core: {
@@ -1088,11 +943,13 @@ describe ( 'Configuration', () => {
 
       fs.writeFileSync ( conf.scopes.global.path, dataNext );
 
-      await delay ( 3500 );
+      await delay ( 1500 );
 
       t.is ( conf.get ( 'core.bar' ), 'custom' );
       t.is ( conf.get ( 'core.test' ), undefined );
       t.is ( conf.scopes.global.dataRaw, dataNext );
+
+      conf.dispose ();
 
     });
 
@@ -1100,20 +957,20 @@ describe ( 'Configuration', () => {
 
       const conf = new Configuration ( Fixtures.options ({ watch: true }) );
 
-      // await new Promise ( resolve => conf.scopes.local.watcher.on ( 'ready', resolve ) ); //FIXME: Not working for some reason
-
-      await delay ( 3500 );
+      await delay ( 500 );
 
       fs.writeFileSync ( conf.scopes.local.path, `{
         "core.foo": "foo",
         "core.bar": "bar"
       }`);
 
-      await delay ( 3500 );
+      await delay ( 1500 );
 
       t.is ( conf.get ( 'core.foo' ), 'foo' );
       t.is ( conf.get ( 'core.bar' ), 'bar' );
       t.is ( conf.get ( 'core.baz' ), 'defaults' );
+
+      conf.dispose ();
 
     });
 

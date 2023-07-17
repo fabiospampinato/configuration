@@ -1,20 +1,18 @@
 
 /* IMPORT */
 
-import type {ProviderStorageOptions} from '../types';
+import type {ProviderSessionStorageOptions} from '../types';
 import ProviderStorage from './storage';
 
 /* MAIN */
 
-class ProviderSessionStorage<Options extends ProviderStorageOptions = ProviderStorageOptions> extends ProviderStorage<Options> {
+class ProviderSessionStorage<Options extends ProviderSessionStorageOptions = ProviderSessionStorageOptions> extends ProviderStorage<Options & { storage: Storage }> {
 
   /* CONSTRUCTOR */
 
-  constructor ( options?: Partial<Options> ) {
+  constructor ( options: Options ) {
 
-    options = { ...options, storage: sessionStorage } as Partial<Options>; //TSC
-
-    super ( options );
+    super ({ ...options, storage: sessionStorage });
 
   }
 

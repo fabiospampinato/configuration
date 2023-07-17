@@ -4,7 +4,6 @@
 import Configuration from '../dist/index.js';
 import ProviderMemory from '../dist/providers/memory.js';
 import {Fixtures} from '../test/fixtures.js';
-import AJV from '../test/ajv.js';
 import benchmark from 'benchloop';
 
 /* HELPERS */
@@ -16,8 +15,7 @@ function getConf () {
       new ProviderMemory ({ scope: 'global' })
     ],
     defaults: Fixtures.defaults (),
-    schema: Fixtures.schema (),
-    filterer: AJV.filterer
+    filter: Fixtures.filter
   });
 }
 
@@ -43,7 +41,8 @@ benchmark.group ( 'constructor', () => {
         providers: [
           new ProviderMemory ({ scope: 'foo' })
         ],
-        filterer: AJV.filterer
+        defaults: {},
+        filter: Fixtures.filter
       });
     }
   });
@@ -57,8 +56,7 @@ benchmark.group ( 'constructor', () => {
           new ProviderMemory ({ scope: 'foo' })
         ],
         defaults: Fixtures.defaults (),
-        schema: Fixtures.schema (),
-        filterer: AJV.filterer
+        filter: Fixtures.filter
       });
     }
   });
@@ -79,19 +77,6 @@ benchmark ({
     ctx.conf.dispose ();
   }
 });
-
-// benchmark ({
-//   name: 'extend',
-//   iterations: 100,
-//   fn: ctx => {
-//     ctx.conf.extend ( 'ext.test', {
-//       defaults: {},
-//       schema: {
-//         type: 'object'
-//       }
-//     });
-//   }
-// });
 
 benchmark ({
   name: 'refresh',
@@ -283,7 +268,7 @@ benchmark ({
 });
 
 benchmark ({
-  name: 'triggerChange',
+  name: 'trigger',
   beforeEach: ctx => {
     ctx.conf = getConf ();
     ctx.conf.onChange ( 'core.foo', () => {} );
@@ -292,8 +277,8 @@ benchmark ({
     ctx.conf.onChange ( '*', () => {} );
   },
   fn: ctx => {
-    ctx.conf.triggerChange ();
-    ctx.conf.triggerChange ( 'local', 'core.foo', 'test' );
+    ctx.conf.trigger ();
+    ctx.conf.trigger ( 'local', 'core.foo', 'test' );
   }
 });
 

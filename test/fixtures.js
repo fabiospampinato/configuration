@@ -1,25 +1,47 @@
 
 /* IMPORT */
 
-import tempy from 'tempy';
+import * as $ from 'skex';
+import {temporaryFile} from 'tempy';
 import ProviderJSON from '../dist/providers/json.js';
-import AJV from './ajv.js';
 
 /* MAIN */
 
 const Fixtures = {
+  schema () {
+
+    return $.object ({
+      core: $.object ({
+        foo: $.string ().optional (),
+        bar: $.string ().optional (),
+        baz: $.string ().optional (),
+        qux: $.string ().optional (),
+        flattened: $.boolean ().optional (),
+        test: $.number ().optional ()
+      }).optional (),
+      true: $.boolean ().optional ()
+    });
+
+  },
+  filter ( data ) {
+
+    const schema = Fixtures.schema ();
+
+    return schema.filter ( data );
+
+  },
   options ( providerOptions = {} ) {
 
     const local = new ProviderJSON ( Object.assign ({
       scope: 'local',
-      path: tempy.file ({ extension: 'json' })
+      path: temporaryFile ({ extension: 'json' })
     }, providerOptions ));
 
     local.writeSync ( Fixtures.local ().data );
 
     const global = new ProviderJSON ( Object.assign ({
       scope: 'global',
-      path: tempy.file ({ extension: 'json' })
+      path: temporaryFile ({ extension: 'json' })
     }, providerOptions ));
 
     global.writeSync ( Fixtures.global ().data );
@@ -27,12 +49,12 @@ const Fixtures = {
     return {
       providers: [local, global],
       defaults: Fixtures.defaults (),
-      schema: Fixtures.schema (),
-      filterer: AJV.filterer
+      filter: Fixtures.filter
     };
 
   },
   defaults () {
+
     return {
       core: {
         foo: 'defaults',
@@ -46,41 +68,10 @@ const Fixtures = {
       true: true,
       undefined: undefined
     };
-  },
-  schema () {
-    return {
-      type: 'object',
-      properties: {
-        core: {
-          type: 'object',
-          properties: {
-            foo: {
-              type: 'string'
-            },
-            bar: {
-              type: 'string'
-            },
-            baz: {
-              type: 'string'
-            },
-            qux: {
-              type: 'string'
-            },
-            flattened: {
-              type: 'boolean'
-            },
-            test: {
-              type: 'number'
-            }
-          }
-        },
-        true: {
-          type: 'boolean'
-        }
-      }
-    };
+
   },
   local () {
+
     return {
       data: {
         core: {
@@ -89,8 +80,10 @@ const Fixtures = {
         }
       }
     };
+
   },
   global () {
+
     return {
       data: {
         core: {
@@ -99,15 +92,31 @@ const Fixtures = {
         }
       }
     };
+
   }
 };
 
 const FixturesArray = {
+  schema () {
+
+    return $.array ( $.object ({
+      foo: $.string (),
+      arr: $.array ( $.number () ).optional ()
+    }));
+
+  },
+  filter ( data ) {
+
+    const schema = FixturesArray.schema ();
+
+    return schema.filter ( data );
+
+  },
   options ( providerOptions = {} ) {
 
     const local = new ProviderJSON ( Object.assign ({
       scope: 'local',
-      path: tempy.file ({ extension: 'json' }),
+      path: temporaryFile ({ extension: 'json' }),
       defaults: [],
       defaultsRaw: '[]',
     }, providerOptions ));
@@ -116,7 +125,7 @@ const FixturesArray = {
 
     const global = new ProviderJSON ( Object.assign ({
       scope: 'global',
-      path: tempy.file ({ extension: 'json' }),
+      path: temporaryFile ({ extension: 'json' }),
       defaults: [],
       defaultsRaw: '[]'
     }, providerOptions ));
@@ -126,52 +135,37 @@ const FixturesArray = {
     return {
       providers: [local, global],
       defaults: FixturesArray.defaults (),
-      schema: FixturesArray.schema (),
-      filterer: AJV.filterer
+      filter: FixturesArray.filter
     };
 
   },
   defaults () {
+
     return [
       { foo: 'defaults' },
       { foo: 'defaults2' }
     ];
-  },
-  schema () {
-    return {
-      type: 'array',
-      items: {
-        type: 'object',
-        required: ['foo'],
-        properties: {
-          foo: {
-            type: 'string'
-          },
-          arr: {
-            type: 'array',
-            items: {
-              type: 'number'
-            }
-          }
-        }
-      }
-    };
+
   },
   local () {
+
     return {
       data: [
         { foo: 'local' },
         { foo: 'local', arr: ['1', '2', '3'] }
       ]
     };
+
   },
   global () {
+
     return {
       data: [
         { foo: 'global', arr: [1, 2, 3] },
         { test: {} }
       ]
     };
+
   }
 };
 

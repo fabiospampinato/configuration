@@ -1,17 +1,16 @@
 
 /* IMPORT */
 
-import cloneDeep from 'plain-object-clone';
 import type {Data, DataRaw, DataUpdate, ProviderMemoryOptions} from '../types';
+import Lang from '../utils/lang';
 import PathProp from '../utils/pp';
-import Type from '../utils/type';
 import ProviderAbstract from './abstract';
 
 /* MAIN */
 
 class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptions> extends ProviderAbstract<Options> {
 
-  /* API */
+  /* PUBLIC API */
 
   async read (): Promise<DataUpdate> {
 
@@ -21,14 +20,14 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
   readSync (): DataUpdate {
 
-    const data = this.data ?? cloneDeep ( this.defaults );
+    const data = this.data ?? Lang.cloneDeep ( this.defaults );
     const dataRaw = this.dataRaw ?? this.defaultsRaw;
 
     return {data, dataRaw};
 
   }
 
-  async write ( data: Data | DataRaw, force: boolean = false ): Promise<void> {
+  async write ( data: Data | DataRaw, force: boolean = false ): Promise<void> { //TODO: Optimize calls to this, which may cause files to be written to disk unnecessarily
 
     return this.writeSync ( data, force );
 
@@ -38,21 +37,21 @@ class ProviderMemory<Options extends ProviderMemoryOptions = ProviderMemoryOptio
 
     if ( !force && this.isEqual ( data ) ) return;
 
-    if ( Type.isString ( data ) ) {
+    if ( Lang.isString ( data ) ) {
 
       this.data = PathProp.unflat ( this.dataParser.parse ( data ) ?? this.defaults );
       this.dataRaw = data;
-      this.dataSchema = this.filterer ( this.data );
+      this.dataFiltered = this.filter ( this.data );
 
     } else {
 
       this.data = PathProp.unflat ( data );
       this.dataRaw = this.dataParser.stringify ( data, this.dataRaw ) ?? this.defaultsRaw;
-      this.dataSchema = this.filterer ( this.data );
+      this.dataFiltered = this.filter ( this.data );
 
     }
 
-    this.triggerChange ();
+    this.trigger ();
 
   }
 

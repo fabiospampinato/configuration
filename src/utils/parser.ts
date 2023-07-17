@@ -1,9 +1,9 @@
 
 /* IMPORT */
 
-import JSONC from 'jsonc-simple-parser';
-import type {Data, DataRaw} from '../types';
-import Type from './type';
+import JSONC from 'tiny-jsonc';
+import type {Data, DataRaw, Value} from '../types';
+import Lang from './lang';
 
 /* MAIN */
 
@@ -11,11 +11,11 @@ class Parser {
 
   /* VARIABLES */
 
-  indentation: string | number | undefined;
+  private indentation: string | number;
 
   /* CONSTRUCTOR */
 
-  constructor ( indentation: string | number | undefined ) {
+  constructor ( indentation: string | number ) {
 
     this.indentation = indentation;
 
@@ -23,13 +23,13 @@ class Parser {
 
   /* API */
 
-  parse ( raw: DataRaw ): Data | undefined {
+  parse ( dataRaw: DataRaw ): Data | undefined {
 
     try {
 
-      const data = JSONC.parse ( raw );
+      const data = JSONC.parse ( dataRaw );
 
-      if ( Type.isObject ( data ) ) return data;
+      if ( Lang.isObject ( data ) ) return data;
 
     } catch {}
 
@@ -37,26 +37,32 @@ class Parser {
 
   stringify ( data: Data, dataRawPrev?: DataRaw ): DataRaw | undefined {
 
+    const getItem = ( value: Value ): string => {
+
+      let item = JSON.stringify ( value, undefined, ' ' );
+
+      item = item.replace ( /\[\s*?(?:\r?\n|\r)\s*/g, '[' );
+      item = item.replace ( /\s*?(?:\r?\n|\r)\s*]/g, ']' );
+      item = item.replace ( /{\s*?(?:\r?\n|\r)\s*/g, '{ ' );
+      item = item.replace ( /\s*?(?:\r?\n|\r)\s*}/g, ' }' );
+      item = item.replace ( /,\s*?(?:\r?\n|\r)\s*/g, ', ' );
+
+      return item;
+
+    };
+
     const getContent = ( data: Data ): DataRaw => {
 
-      if ( Type.isArray ( data ) ) {
+      if ( Lang.isArray ( data ) ) {
 
-        //TODO: Publish the following code as 2 separate packages
-
-        const lines = data.map ( item => JSONC.stringify ( item, undefined, ' ' )
-                          .replace ( /\[\s*?(?:\r?\n|\r)\s*/g, '[' )
-                          .replace ( /\s*?(?:\r?\n|\r)\s*]/g, ']' )
-                          .replace ( /{\s*?(?:\r?\n|\r)\s*/g, '{ ' )
-                          .replace ( /\s*?(?:\r?\n|\r)\s*}/g, ' }' )
-                          .replace ( /,\s*?(?:\r?\n|\r)\s*/g, ', ' ) );
-
-        const indentation = Type.isString ( this.indentation ) ? this.indentation : ' '.repeat ( this.indentation || 0 );
+        const lines = data.map ( getItem );
+        const indentation = Lang.isString ( this.indentation ) ? this.indentation : ' '.repeat ( this.indentation );
 
         return `[\n${indentation}${lines.join ( `,\n${indentation}` )}\n]`;
 
       } else {
 
-        return JSONC.stringify ( data, undefined, this.indentation );
+        return JSON.stringify ( data, undefined, this.indentation );
 
       }
 
@@ -66,7 +72,7 @@ class Parser {
 
       if ( !dataRaw ) return '';
 
-      const isValid = JSONC.validate ( dataRaw );
+      const isValid = !!this.parse ( dataRaw );
 
       if ( isValid ) return '';
 

@@ -5,7 +5,7 @@ import pp from 'path-prop';
 
 /* MAIN */
 
-// Wrapper around path-prop, with looser typings
+// Wrapper around path-prop, with looser returned types
 
 const PathProp = {
 
@@ -17,21 +17,21 @@ const PathProp = {
 
   },
 
-  set: <T extends object> ( object: T, path: string, value: unknown ): T => {
-
-    return pp.set ( object, path, value );
-
-  },
-
-  delete: ( object: object, path: string ): void => {
-
-    return pp.delete ( object, path );
-
-  },
-
   has: ( object: object, path: string ): boolean => {
 
     return pp.has ( object, path );
+
+  },
+
+  remove: ( object: object, path: string ): void => {
+
+    pp.delete ( object, path );
+
+  },
+
+  set: ( object: object, path: string, value: unknown ): void => {
+
+    pp.set ( object, path, value );
 
   },
 

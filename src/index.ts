@@ -1,51 +1,49 @@
 
 /* IMPORT */
 
-import cloneDeep from 'plain-object-clone';
-import isEqual from 'plain-object-is-equal';
-import merge from 'plain-object-merge';
 import {SCOPE_ALL, SCOPE_DEFAULTS} from './config';
 import ProviderMemory from './providers/memory';
+import Lang from './utils/lang';
 import PathProp from './utils/pp';
-import Type from './utils/type';
-import type {Scope, ScopeAll, Scopes, Path, Value, Data, DataRaw, Schema, ExtendData, Disposer, ChangeHandler, ChangeHandlerData, Options, Provider, Filterer, FiltererWrapper} from './types';
+import type {Scope, ScopeAll, Scopes, Path, Value, Data, DataRaw, Disposer, ChangeHandler, ChangeHandlerData, Options, Provider, Filter} from './types';
 
 /* MAIN */
+
+//TODO: Somehow preserve comments in `dataRaw` when editing `data` via the APIs (edit `dataRaw` directly when possible)
 
 class Configuration {
 
   /* VARIABLES */
 
-  providers: Provider[];
-  scopes: Scopes;
-  defaults: Provider;
-  isArray: boolean;
-  schema?: Schema;
-  filtererRaw: Filterer;
-  filterer: FiltererWrapper;
-  scope: Scope;
-  dataSchema!: Data;
-  handlers: ChangeHandlerData[];
+  private providers: Provider[];
+  private scopes: Scopes;
+  private scope: Scope;
+
+  private isArray: boolean;
+  private defaults: Provider;
+  private data: Data;
+  private filter: Filter;
+
+  private handlers: ChangeHandlerData[];
 
   /* CONSTRUCTOR */
 
-  constructor ( options: Partial<Options> & Pick<Options, 'filterer'> ) {
+  constructor ( options: Options ) {
 
-    if ( !options.providers?.length ) throw new Error ( 'You need to pass at least one configuration provider' );
+    if ( !options.providers.length ) throw new Error ( 'You need to provide at least one configuration provider' );
 
     this.providers = options.providers;
     this.scopes = {};
-    this.scope = options.scope ?? this.providers[this.providers.length - 1].scope;
-    this.handlers = [];
+    this.scope = options.scope ?? this.providers[this.providers.length - 1].scope; //TODO: Should this really be configurable?
 
-    this.isArray = Type.isArray ( options.defaults );
-
+    this.isArray = Lang.isArray ( options.defaults );
     this.defaults = new ProviderMemory ({ scope: SCOPE_DEFAULTS });
-    this.defaults.writeSync ( options.defaults || {}, true );
+    this.defaults.writeSync ( options.defaults, true );
 
-    this.schema = options.schema;
-    this.filtererRaw = options.filterer;
-    this.filterer = value => this.filtererRaw ( value, this.schema );
+    this.data = options.defaults.constructor ();
+    this.filter = value => options.filter?.( value ) ?? value;
+
+    this.handlers = [];
 
     this.init ();
 
@@ -53,7 +51,7 @@ class Configuration {
 
   /* HELPERS */
 
-  _getTargetScopeForPath ( path: Path ): Scope {
+  private getTargetScopeForPath ( path: Path ): Scope {
 
     for ( let i = 0, l = this.providers.length - 1; i < l; i++ ) {
 
@@ -67,18 +65,16 @@ class Configuration {
 
   }
 
-  /* API */
+  /* PRIVATE API */
 
-  init (): void {
+  private init (): void {
 
     this.providers.push ( this.defaults );
 
-    for ( let i = 0, l = this.providers.length; i < l; i++ ) {
+    for ( const provider of this.providers ) {
 
-      const provider = this.providers[i];
-
-      provider.filterer = this.filterer;
-      provider.dataSchema = provider.filterer ( provider.data );
+      provider.filter = this.filter;
+      provider.dataFiltered = provider.filter ( provider.data );
       provider.onChange ( this.refresh.bind ( this ) );
 
       this.scopes[provider.scope] = provider;
@@ -89,91 +85,52 @@ class Configuration {
 
   }
 
+  private refresh (): void {
+
+    const datas = this.providers.map ( provider => provider.dataFiltered ).reverse ();
+    const datasFiltered = datas.filter ( data => Lang.isArray ( data ) === this.isArray );
+
+    this.data = this.isArray ? datasFiltered.flat () : Lang.merge ( datasFiltered );
+
+    this.trigger ();
+
+  }
+
+  private trigger (): void {
+
+    for ( const data of this.handlers ) {
+
+      const value = data.getter ();
+
+      if ( Lang.isNullary ( data.callback ) ) { //TODO: This is not exactly correct, something might have been changed while the flattened configuration could still be the same, but this is much faster
+
+        data.callback ();
+
+      } else {
+
+        if ( Lang.isEqual ( data.value, value ) ) continue;
+
+        const valueNext = Lang.cloneDeep ( value );
+
+        data.callback ( valueNext, data.value );
+
+        data.value = valueNext;
+
+      }
+
+    }
+
+  }
+
+  /* PUBLIC API */
+
   dispose (): void {
 
-    for ( let i = 0, l = this.providers.length; i < l; i++ ) {
-
-      const provider = this.providers[i];
+    for ( const provider of this.providers ) {
 
       provider.dispose ();
 
     }
-
-  }
-
-  extend ( namespace: string, data: ExtendData ): Disposer {
-
-    if ( this.has ( namespace ) ) throw new Error ( `The namespace "${namespace}" is already in use` );
-
-    if ( this.schema && !data.schema ) throw new Error ( `You need to provide a schema for the "${namespace}" namespace` );
-
-    if ( data.schema ) throw new Error ( `The provided schema for the "${namespace}" namespace is invalid` ); //TODO: Actually validate schema
-
-    if ( !data.defaults && !data.schema ) return () => {};
-
-    let namespaceSchema = '';
-
-    if ( this.schema && data.schema ) {
-
-      let segments = namespace.split ( '.' );
-      let schemaPatch = {};
-
-      for ( let i = 0, l = segments.length - 1; i < l; i++ ) {
-
-        namespaceSchema += `${i ? '.' : ''}properties.${segments[i]}`;
-
-        const typePrev = PathProp.get ( this.schema, `${namespaceSchema}.type` );
-
-        if ( typePrev && typePrev !== 'object' ) throw new Error ( `The provided schema for the "${namespace}" is incompatible with the existing schema` );
-
-        schemaPatch = PathProp.set ( schemaPatch, namespaceSchema, { type: 'object', properties: {} } );
-
-      }
-
-      namespaceSchema += `${namespaceSchema ? '.' : ''}properties.${segments[segments.length - 1]}`;
-
-      schemaPatch = PathProp.set ( schemaPatch, namespaceSchema, data.schema );
-
-      const schema = merge ([ this.schema, schemaPatch ]);
-
-      this.schema = schema;
-
-    }
-
-    if ( data.defaults ) {
-
-      this.defaults.writeSync ( PathProp.set ( this.defaults.data, namespace, PathProp.unflat ( data.defaults ) ), true );
-
-    }
-
-    return () => {
-
-      if ( this.schema && data.schema ) {
-
-        PathProp.delete ( this.schema, namespaceSchema );
-
-      }
-
-      if ( data.defaults ) {
-
-        PathProp.delete ( this.defaults.data, namespace );
-
-        this.defaults.writeSync ( this.defaults.data, true );
-
-      }
-
-    };
-
-  }
-
-  refresh (): void {
-
-    const datas = this.providers.map ( provider => provider.dataSchema ).reverse ();
-    const datasFiltered = datas.filter ( data => Type.isArray ( data ) === this.isArray );
-
-    this.dataSchema = this.isArray ? Array.prototype.concat ( ...datasFiltered ) : merge ( datasFiltered );
-
-    this.triggerChange ();
 
   }
 
@@ -184,31 +141,33 @@ class Configuration {
   get ( path: Path ): Value | undefined;
   get ( scope?: Scope | Path, path?: Path ): Record<Scope, Data> | Record<Scope, Value | undefined> | Data | Value | undefined {
 
-    if ( Type.isUndefined ( scope ) ) return this.dataSchema;
+    if ( Lang.isUndefined ( scope ) ) { // Data
 
-    if ( scope === SCOPE_ALL ) { // All
+      return this.data;
 
-      const accumulator = {};
+    } else if ( scope === SCOPE_ALL ) { // All
 
-      for ( let scope in this.scopes ) {
+      const scopes: Record<Scope, Data | Value | undefined> = {};
 
-        accumulator[scope] = Type.isUndefined ( path ) ? this.scopes[scope].dataSchema : PathProp.get ( this.scopes[scope].dataSchema, path );
+      for ( const scope in this.scopes ) {
+
+        scopes[scope] = Lang.isUndefined ( path ) ? this.scopes[scope].dataFiltered : PathProp.get ( this.scopes[scope].dataFiltered, path );
 
       }
 
-      return accumulator;
+      return scopes;
 
-    } else if ( Type.isUndefined ( path ) ) { // Path
+    } else if ( Lang.isUndefined ( path ) ) { // Path
 
-      return PathProp.get ( this.dataSchema, scope );
+      return PathProp.get ( this.data, scope );
 
     } else { // Scope + Path
 
       const provider = this.scopes[scope];
 
-      if ( !provider ) throw new Error ( 'You can\'t get from unknown scopes' );
+      if ( !provider ) throw new Error ( 'You cannot get from unknown scopes' );
 
-      return PathProp.get ( provider.dataSchema, path );
+      return PathProp.get ( provider.dataFiltered, path );
 
     }
 
@@ -222,70 +181,27 @@ class Configuration {
 
     if ( scope === SCOPE_ALL ) { // All
 
-      const accumulator = {};
+      const scopes: Record<Scope, boolean> = {};
 
-      for ( let scope in this.scopes ) {
+      for ( const scope in this.scopes ) {
 
-        accumulator[scope] = Type.isUndefined ( path ) ? !!this.scopes[scope].dataSchema : PathProp.has ( this.scopes[scope].dataSchema, path );
+        scopes[scope] = Lang.isUndefined ( path ) ? !!this.scopes[scope].dataFiltered : PathProp.has ( this.scopes[scope].dataFiltered, path );
 
       }
 
-      return accumulator;
+      return scopes;
 
-    } else if ( Type.isUndefined ( path ) ) { // Path
+    } else if ( Lang.isUndefined ( path ) ) { // Path
 
-      return PathProp.has ( this.dataSchema, scope );
+      return PathProp.has ( this.data, scope );
 
     } else { // Scope + Path
 
       const provider = this.scopes[scope];
 
-      if ( !provider ) throw new Error ( 'You can\'t check unknown scopes' );
+      if ( !provider ) throw new Error ( 'You cannot check unknown scopes' );
 
-      return PathProp.has ( provider.dataSchema, path );
-
-    }
-
-  }
-
-  set ( scope: ScopeAll, path: Path, value: Value ): void;
-  set ( scope: Scope, path: Path, value: Value ): void;
-  set ( path: Path, value: Value ): void;
-  set ( scope: Scope | Path, path: Path | Value, value?: Value ): void {
-
-    if ( Type.isUndefined ( value ) ) return this.set ( this._getTargetScopeForPath ( scope ), scope, path ); // Path
-
-    if ( !Type.isString ( path ) ) return; //TSC
-
-    if ( scope === SCOPE_ALL ) { // All
-
-      for ( let scope in this.scopes ) {
-
-        if ( scope === SCOPE_DEFAULTS ) continue;
-
-        const provider = this.scopes[scope];
-
-        if ( PathProp.get ( provider.data, path ) === value ) continue;
-
-        PathProp.set ( provider.data, path, value );
-
-        provider.write ( provider.data, true );
-
-      }
-
-    } else { // Scope + Path
-
-      if ( scope === SCOPE_DEFAULTS ) throw new Error ( 'You can\'t set in the "defaults" scope' );
-
-      const provider = this.scopes[scope];
-
-      if ( !provider ) throw new Error ( 'You can\'t set in unknown scopes' );
-
-      if ( PathProp.get ( provider.data, path ) === value ) return;
-
-      PathProp.set ( provider.data, path, value );
-
-      provider.write ( provider.data, true );
+      return PathProp.has ( provider.dataFiltered, path );
 
     }
 
@@ -296,11 +212,13 @@ class Configuration {
   remove ( path: Path ): void;
   remove ( scope: Scope | Path, path?: Path ): void {
 
-    if ( Type.isUndefined ( path ) ) return this.remove ( SCOPE_ALL, scope ); // Path
+    if ( Lang.isUndefined ( path ) ) { // Path
 
-    if ( scope === SCOPE_ALL ) { // All
+      return this.remove ( SCOPE_ALL, scope );
 
-      for ( let scope in this.scopes ) {
+    } else if ( scope === SCOPE_ALL ) { // All
+
+      for ( const scope in this.scopes ) {
 
         if ( scope === SCOPE_DEFAULTS ) continue;
 
@@ -308,7 +226,7 @@ class Configuration {
 
         if ( !PathProp.has ( provider.data, path ) ) continue;
 
-        PathProp.delete ( provider.data, path );
+        PathProp.remove ( provider.data, path );
 
         provider.write ( provider.data, true );
 
@@ -316,15 +234,90 @@ class Configuration {
 
     } else { // Scope + Path
 
-      if ( scope === SCOPE_DEFAULTS ) throw new Error ( 'You can\'t delete in the "defaults" scope' );
+      if ( scope === SCOPE_DEFAULTS ) throw new Error ( 'You cannot delete in the "defaults" scope' );
 
       const provider = this.scopes[scope];
 
-      if ( !provider ) throw new Error ( 'You can\'t remove from unknown scopes' );
+      if ( !provider ) throw new Error ( 'You cannot remove from unknown scopes' );
 
       if ( !PathProp.has ( provider.data, path ) ) return;
 
-      PathProp.delete ( provider.data, path );
+      PathProp.remove ( provider.data, path );
+
+      provider.write ( provider.data, true );
+
+    }
+
+  }
+
+  reset (): void;
+  reset ( scope: Scope ): void;
+  reset ( scope: Scope = SCOPE_ALL ): void {
+
+    if ( scope === SCOPE_ALL ) { // All
+
+      for ( const scope in this.scopes ) {
+
+        if ( scope === SCOPE_DEFAULTS ) continue;
+
+        this.scopes[scope].write ( this.scopes[scope].defaultsRaw );
+
+      }
+
+    } else { // Scope
+
+      if ( scope === SCOPE_DEFAULTS ) throw new Error ( 'You cannot reset the "defaults" scope' );
+
+      const provider = this.scopes[scope];
+
+      if ( !provider ) throw new Error ( 'You cannot reset unknown scopes' );
+
+      provider.write ( provider.defaultsRaw );
+
+    }
+
+  }
+
+  set ( scope: ScopeAll, path: Path, value: Value ): void;
+  set ( scope: Scope, path: Path, value: Value ): void;
+  set ( path: Path, value: Value ): void;
+  set ( scope: Scope | Path, path: Path | Value, value?: Value ): void {
+
+    if ( Lang.isUndefined ( value ) ) { // Path
+
+      return this.set ( this.getTargetScopeForPath ( scope ), scope, path );
+
+    }
+
+    if ( !Lang.isString ( path ) ) return; //TSC
+
+    if ( scope === SCOPE_ALL ) { // All
+
+      for ( const scope in this.scopes ) {
+
+        if ( scope === SCOPE_DEFAULTS ) continue;
+
+        const provider = this.scopes[scope];
+
+        if ( Lang.isEqual ( PathProp.get ( provider.data, path ), value ) ) continue;
+
+        PathProp.set ( provider.data, path, value );
+
+        provider.write ( provider.data, true );
+
+      }
+
+    } else { // Scope + Path
+
+      if ( scope === SCOPE_DEFAULTS ) throw new Error ( 'You cannot set in the "defaults" scope' );
+
+      const provider = this.scopes[scope];
+
+      if ( !provider ) throw new Error ( 'You cannot set in unknown scopes' );
+
+      if ( Lang.isEqual ( PathProp.get ( provider.data, path ), value ) ) return;
+
+      PathProp.set ( provider.data, path, value );
 
       provider.write ( provider.data, true );
 
@@ -337,13 +330,17 @@ class Configuration {
   update ( data: Data | DataRaw ): void;
   update ( scope: Scope | Data | DataRaw, data?: Data | DataRaw ): void {
 
-    if ( Type.isUndefined ( data ) ) return this.update ( this.scope, scope ); // Data
+    if ( Lang.isUndefined ( data ) ) { // Data
 
-    if ( !Type.isString ( scope ) ) return; //TSC
+      return this.update ( this.scope, scope );
+
+    }
+
+    if ( !Lang.isString ( scope ) ) return; //TSC
 
     if ( scope === SCOPE_ALL ) { // All
 
-      for ( let scope in this.scopes ) {
+      for ( const scope in this.scopes ) {
 
         if ( scope === SCOPE_DEFAULTS ) continue;
 
@@ -353,68 +350,13 @@ class Configuration {
 
     } else { // Scope + Path
 
-      if ( scope === SCOPE_DEFAULTS ) throw new Error ( 'You can\'t update in the "defaults" scope' );
+      if ( scope === SCOPE_DEFAULTS ) throw new Error ( 'You cannot update in the "defaults" scope' );
 
       const provider = this.scopes[scope];
 
-      if ( !provider ) throw new Error ( 'You can\'t update unknown scopes' );
+      if ( !provider ) throw new Error ( 'You cannot update unknown scopes' );
 
       provider.write ( data );
-
-    }
-
-  }
-
-  reset (): void;
-  reset ( scope: Scope ): void;
-  reset ( scope: Scope = SCOPE_ALL ): void {
-
-    if ( scope === SCOPE_ALL ) { // All
-
-      for ( let scope in this.scopes ) {
-
-        if ( scope === SCOPE_DEFAULTS ) continue;
-
-        this.scopes[scope].write ( this.scopes[scope].defaultsRaw );
-
-      }
-
-    } else { // Scope
-
-      if ( scope === SCOPE_DEFAULTS ) throw new Error ( 'You can\'t reset the "defaults" scope' );
-
-      const provider = this.scopes[scope];
-
-      if ( !provider ) throw new Error ( 'You can\'t reset unknown scopes' );
-
-      provider.write ( provider.defaultsRaw );
-
-    }
-
-  }
-
-  triggerChange (): void {
-
-    for ( let i = 0, l = this.handlers.length; i < l; i++ ) {
-
-      const data = this.handlers[i];
-      const value = data.getter ();
-
-      if ( Type.isNullary ( data.callback ) ) { //TODO: This is not exactly correct, something might have been changed while the flattened configuration could still be the same, but it's much faster
-
-        data.callback ();
-
-      } else {
-
-        if ( isEqual ( data.value, value ) ) continue;
-
-        const clone = Type.isPrimitive ( value ) ? value : cloneDeep ( value );
-
-        data.callback ( clone, data.value );
-
-        data.value = clone;
-
-      }
 
     }
 
@@ -431,14 +373,14 @@ class Configuration {
     const args = arguments;
     const getterArgs = Array.prototype.slice.call ( args, 0, -1 );
     const callback = args[args.length - 1];
-    const getter = () => this.get.apply ( this, getterArgs );
+    const getter = () => this.get ( ...getterArgs );
     const valueRaw = getter ();
-    const value = !Type.isNullary ( callback ) ? ( Type.isPrimitive ( valueRaw ) ? valueRaw : cloneDeep ( valueRaw ) ) : undefined;
+    const value = !Lang.isNullary ( callback ) ? Lang.cloneDeep ( valueRaw ) : undefined;
     const data: ChangeHandlerData = {callback, getter, value};
 
-    handlers[handlers.length] = data;
+    handlers.push ( data );
 
-    return () => {
+    return (): void => {
 
       handlers.splice ( handlers.indexOf ( data ), 1 );
 

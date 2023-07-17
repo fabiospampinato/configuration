@@ -1,12 +1,11 @@
 
 /* IMPORT */
 
-import isEqual from 'plain-object-is-equal';
-import type {Disposer, Data, DataRaw, DataUpdate, DataParser, ProviderChangeHandler, ProviderAbstractOptions} from '../types';
-import {DEFAULTS, SCOPE_ALL} from '../config';
+import type {Disposer, Data, DataRaw, DataUpdate, DataParser, Filter, ProviderChangeHandler, ProviderAbstractOptions} from '../types';
+import {SCOPE_ALL} from '../config';
+import Lang from '../utils/lang';
 import Parser from '../utils/parser';
 import PathProp from '../utils/pp';
-import Type from '../utils/type';
 
 /* MAIN */
 
@@ -17,57 +16,63 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
   scope: string;
   data!: Data;
   dataRaw!: DataRaw;
-  dataSchema!: Data;
+  dataFiltered!: Data;
   dataParser: DataParser;
   defaults: Data;
   defaultsRaw: DataRaw;
+  filter: Filter = Lang.identity;
   handlers: ProviderChangeHandler[];
 
   /* CONSTRUCTOR */
 
-  constructor ( options?: Partial<Options> ) {
+  constructor ( options: Options ) {
 
-    if ( options?.scope === SCOPE_ALL ) throw new Error ( `"${SCOPE_ALL}" is not a valid scope name for a provider` );
+    if ( options.scope === SCOPE_ALL ) throw new Error ( `"${SCOPE_ALL}" is not a valid scope name for a provider` );
+    // if ( options.scope === SCOPE_DEFAULTS ) throw new Error ( `"${SCOPE_DEFAULTS}" is not a valid scope name for a provider` ); //TODO: Account for the "defaults" scope created internally rather than externally
 
-    this.scope = options?.scope ?? DEFAULTS.scope;
-    this.dataParser = options?.parser ?? new Parser ( options?.indentation ?? DEFAULTS.indentation );
-    this.defaultsRaw = options?.defaultsRaw ?? DEFAULTS.defaultsRaw;
-    this.defaults = PathProp.unflat ( options?.defaults ?? ( this.dataParser.parse ( this.defaultsRaw ) || DEFAULTS.defaults ) );
+    this.scope = options.scope;
+    this.dataParser = options.parser ?? new Parser ( options?.indentation ?? '\t' );
+    this.defaultsRaw = options.defaultsRaw ?? '{\n\t\n}';
+    this.defaults = PathProp.unflat ( options.defaults ?? ( this.dataParser.parse ( this.defaultsRaw ) || {} ) );
     this.handlers = [];
 
     this.init ();
 
   }
 
-  /* API */
+  /* PROTECTED API */
 
-  init (): void {
+  protected init (): void {
 
     const {data, dataRaw} = this.readSync ();
 
     this.data = data;
     this.dataRaw = dataRaw;
-    this.dataSchema = this.filterer ( this.data );
+    this.dataFiltered = this.filter ( this.data );
 
   }
 
-  dispose (): void {}
+  protected isEqual ( data: Data | DataRaw ): boolean {
 
-  filterer ( data: Data ): Data {
-
-    return data;
+    return Lang.isString ( data ) ? data === this.dataRaw : Lang.isEqual ( data, this.data );
 
   }
 
-  isEqual ( data: Data | DataRaw ): boolean {
+  protected trigger (): void {
 
-    return Type.isString ( data ) ? data === this.dataRaw : isEqual ( data, this.data );
+    for ( const handler of this.handlers ) {
+
+      handler ();
+
+    }
 
   }
 
-  triggerChange (): void {
+  /* PUBLIC API */
 
-    this.handlers.forEach ( handler => handler () );
+  dispose (): void {
+
+    return;
 
   }
 
@@ -75,7 +80,7 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
 
     this.handlers.push ( handler );
 
-    return () => {
+    return (): void => {
 
       this.handlers.splice ( this.handlers.indexOf ( handler ), 1 );
 

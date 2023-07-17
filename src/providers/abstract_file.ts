@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import type {WriteOptions} from 'atomically/dist/types';
-import type {Encoding, FSWatcher, ProviderFileOptions} from '../types';
+import type {Disposer, Encoding, ProviderFileOptions} from '../types';
 import ProviderMemory from './memory';
 
 /* MAIN */
@@ -13,17 +13,17 @@ abstract class ProviderAbstractFile<Options extends ProviderFileOptions = Provid
 
   path?: string;
   watching: boolean;
-  watcher?: FSWatcher;
+  watcherDisposer?: Disposer;
   writeOptions?: WriteOptions;
   writeSyncOptions?: WriteOptions;
 
   /* CONSTRUCTOR */
 
-  constructor ( options: Partial<Options> ) {
+  constructor ( options: Options ) {
 
     super ( options );
 
-    this.watching = !!options.watch;
+    this.watching = options.watch ?? false;
     this.writeOptions = options.writeOptions;
     this.writeSyncOptions = options.writeSyncOptions;
 
@@ -31,9 +31,11 @@ abstract class ProviderAbstractFile<Options extends ProviderFileOptions = Provid
 
   }
 
-  /* API */
+  /* PUBLIC API */
 
   dispose (): void {
+
+    super.dispose ();
 
     this.unwatch ();
 
@@ -49,7 +51,7 @@ abstract class ProviderAbstractFile<Options extends ProviderFileOptions = Provid
 
     this.init ();
 
-    if ( !_initial ) this.triggerChange ();
+    if ( !_initial ) this.trigger ();
 
     if ( this.watching ) this.watch ();
 
@@ -61,7 +63,7 @@ abstract class ProviderAbstractFile<Options extends ProviderFileOptions = Provid
 
     const path = this.path;
 
-    this.watcher = this.fileWatch ( path, async () => {
+    this.watcherDisposer = this.fileWatch ( path, async () => {
 
       const {dataRaw} = await this.read ();
 
@@ -69,7 +71,7 @@ abstract class ProviderAbstractFile<Options extends ProviderFileOptions = Provid
 
       if ( this.isEqual ( dataRaw ) ) return;
 
-      super.write ( dataRaw, true );
+      super.writeSync ( dataRaw, true );
 
     });
 
@@ -77,11 +79,8 @@ abstract class ProviderAbstractFile<Options extends ProviderFileOptions = Provid
 
   unwatch (): void {
 
-    if ( !this.watcher ) return;
-
-    this.watcher.close ();
-
-    delete this.watcher;
+    this.watcherDisposer?.();
+    this.watcherDisposer = undefined;
 
   }
 
@@ -93,7 +92,7 @@ abstract class ProviderAbstractFile<Options extends ProviderFileOptions = Provid
 
   abstract fileWriteSync ( filePath: string, data: string, options?: WriteOptions ): void;
 
-  abstract fileWatch ( filePath: string, callback: Function ): FSWatcher;
+  abstract fileWatch ( filePath: string, callback: Function ): Disposer;
 
 }
 
