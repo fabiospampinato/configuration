@@ -8,6 +8,7 @@ import type {WriteOptions} from 'atomically/dist/types';
 type Encoding = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'utf16le' | 'ucs2' | 'ucs-2';
 
 type Scope = string;
+type ScopeDefaults = 'defaults';
 type ScopeAll = '*';
 
 type Scopes = {
@@ -43,7 +44,6 @@ type ChangeHandlerData = {
 };
 
 type Callback = () => void;
-
 type Disposer = () => void;
 
 type Options = {
@@ -56,8 +56,6 @@ type Options = {
 /* PROVIDERS TYPES */
 
 type Provider = import ( './providers/abstract' ).default;
-
-type ProviderChangeHandler = () => void;
 
 type ProviderAbstractOptions = {
   scope: string,
@@ -93,4 +91,4 @@ type ProviderSessionStorageOptions = ProviderAbstractOptions & {
 
 /* EXPORT */
 
-export type {Encoding, Scope, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, Value, ValueArray, ValueObject, Filter, ChangeHandler, ChangeHandlerData, Callback, Disposer, Options, Provider, ProviderChangeHandler, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions, ProviderLocalStorageOptions, ProviderSessionStorageOptions};
+export type {Encoding, Scope, ScopeDefaults, ScopeAll, Scopes, Path, Data, DataRaw, DataUpdate, DataParser, Value, ValueArray, ValueObject, Filter, ChangeHandler, ChangeHandlerData, Callback, Disposer, Options, Provider, ProviderAbstractOptions, ProviderFileOptions, ProviderJSONOptions, ProviderMemoryOptions, ProviderStorageOptions, ProviderLocalStorageOptions, ProviderSessionStorageOptions};

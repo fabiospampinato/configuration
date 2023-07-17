@@ -1,7 +1,7 @@
 
 /* IMPORT */
 
-import {SCOPE_ALL, SCOPE_DEFAULTS} from './config';
+import {SCOPE_ALL, SCOPE_DEFAULTS} from './constants';
 import ProviderMemory from './providers/memory';
 import Lang from './utils/lang';
 import PathProp from './utils/pp';
@@ -100,13 +100,13 @@ class Configuration {
 
     for ( const data of this.handlers ) {
 
-      const value = data.getter ();
-
       if ( Lang.isNullary ( data.callback ) ) { //TODO: This is not exactly correct, something might have been changed while the flattened configuration could still be the same, but this is much faster
 
         data.callback ();
 
       } else {
+
+        const value = data.getter ();
 
         if ( Lang.isEqual ( data.value, value ) ) continue;
 

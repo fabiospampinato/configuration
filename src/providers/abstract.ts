@@ -1,8 +1,8 @@
 
 /* IMPORT */
 
-import type {Disposer, Data, DataRaw, DataUpdate, DataParser, Filter, ProviderChangeHandler, ProviderAbstractOptions} from '../types';
-import {SCOPE_ALL} from '../config';
+import type {Callback, Disposer, Data, DataRaw, DataUpdate, DataParser, Filter, ProviderAbstractOptions} from '../types';
+import {SCOPE_ALL} from '../constants';
 import Lang from '../utils/lang';
 import Parser from '../utils/parser';
 import PathProp from '../utils/pp';
@@ -21,7 +21,7 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
   defaults: Data;
   defaultsRaw: DataRaw;
   filter: Filter = Lang.identity;
-  handlers: ProviderChangeHandler[];
+  handlers: Callback[];
 
   /* CONSTRUCTOR */
 
@@ -76,7 +76,7 @@ abstract class ProviderAbstract<Options extends ProviderAbstractOptions = Provid
 
   }
 
-  onChange ( handler: ProviderChangeHandler ): Disposer {
+  onChange ( handler: Callback ): Disposer {
 
     this.handlers.push ( handler );
 

@@ -31,7 +31,11 @@ class Parser {
 
       if ( Lang.isObject ( data ) ) return data;
 
-    } catch {}
+    } catch {
+
+      return undefined;
+
+    }
 
   }
 
@@ -92,7 +96,11 @@ class Parser {
 
       return `${content}${backup}`;
 
-    } catch {}
+    } catch {
+
+      return undefined;
+
+    }
 
   }
 
