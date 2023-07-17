@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import isEqual from 'are-deeply-equal';
-import {cloneDeep} from 'duper';
+import cloneDeep from 'plain-object-clone';
 import merge from 'plain-object-merge';
 import type {ValueArray, ValueObject} from '../types';
 
@@ -12,9 +12,14 @@ const Lang = {
 
   /* API */
 
-  cloneDeep,
   isEqual,
   merge,
+
+  cloneDeep: <T> ( value: T ): T => {
+
+    return Lang.isObject ( value ) ? cloneDeep ( value ) : value;
+
+  },
 
   identity: <T> ( value: T ): T => {
 

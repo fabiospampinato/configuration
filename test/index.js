@@ -2,10 +2,10 @@
 /* IMPORT */
 
 import isEqual from 'are-deeply-equal';
-import {cloneDeep} from 'duper';
 import {describe} from 'fava';
 import fs from 'node:fs';
 import {setTimeout as delay} from 'node:timers/promises';
+import cloneDeep from 'plain-object-clone';
 import {temporaryFile} from 'tempy';
 import Configuration from '../dist/index.js';
 import ProviderJSON from '../dist/providers/json.js';

@@ -99,9 +99,9 @@
   "dependencies": {
     "are-deeply-equal": "^1.0.2",
     "atomically": "^2.0.1",
-    "duper": "^1.0.1",
     "file-pollex": "^1.1.0",
     "path-prop": "^2.0.0",
+    "plain-object-clone": "^2.0.0",
     "plain-object-merge": "^2.0.0",
     "tiny-jsonc": "^1.0.1"
   },
