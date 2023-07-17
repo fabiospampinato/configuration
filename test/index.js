@@ -1,11 +1,11 @@
 
 /* IMPORT */
 
-import isEqual from 'are-deeply-equal';
 import {describe} from 'fava';
 import fs from 'node:fs';
 import {setTimeout as delay} from 'node:timers/promises';
 import cloneDeep from 'plain-object-clone';
+import isEqual from 'plain-object-is-equal';
 import {temporaryFile} from 'tempy';
 import Configuration from '../dist/index.js';
 import ProviderJSON from '../dist/providers/json.js';
