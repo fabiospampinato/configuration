@@ -331,6 +331,21 @@ describe ( 'Configuration', () => {
 
   });
 
+  describe ( 'scope', it => {
+
+    it ( 'can retrive an internal scope', t => {
+
+      const conf = new Configuration ( Fixtures.options () );
+
+      t.is ( conf.scope ( 'local' ), conf.providers[0] );
+      t.is ( conf.scope ( 'global' ), conf.providers[1] );
+      t.is ( conf.scope ( 'defaults' ), conf.providers[2] );
+      t.is ( conf.scope ( 'missing' ), undefined );
+
+    });
+
+  });
+
   describe ( 'set', it => {
 
     it ( 'can set in all scopes except defaults', t => {

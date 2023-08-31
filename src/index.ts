@@ -282,6 +282,12 @@ class Configuration {
 
   }
 
+  scope ( scope: Scope ): Provider | undefined {
+
+    return this.scopes[scope];
+
+  }
+
   set ( scope: ScopeAll, path: Path, value: Value ): void;
   set ( scope: Scope, path: Path, value: Value ): void;
   set ( path: Path, value: Value ): void;
