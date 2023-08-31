@@ -49,8 +49,7 @@ type Disposer = () => void;
 type Options = {
   providers: Provider[],
   defaults: Data,
-  filter?: Filter,
-  scope?: Scope
+  filter?: Filter
 };
 
 /* PROVIDERS TYPES */

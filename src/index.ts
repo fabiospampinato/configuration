@@ -17,7 +17,6 @@ class Configuration {
 
   private providers: Provider[];
   private scopes: Scopes;
-  private scope: Scope;
 
   private isArray: boolean;
   private defaults: Provider;
@@ -34,7 +33,6 @@ class Configuration {
 
     this.providers = options.providers;
     this.scopes = {};
-    this.scope = options.scope ?? this.providers[this.providers.length - 1].scope; //TODO: Should this really be configurable?
 
     this.isArray = Lang.isArray ( options.defaults );
     this.defaults = new ProviderMemory ({ scope: SCOPE_DEFAULTS });
@@ -51,7 +49,13 @@ class Configuration {
 
   /* HELPERS */
 
-  private getTargetScopeForPath ( path: Path ): Scope {
+  private getDefaultScope (): Scope | undefined {
+
+    return this.providers[this.providers.length - 2]?.scope; //UGLY
+
+  }
+
+  private getTargetScopeForPath ( path: Path ): Scope | undefined {
 
     for ( let i = 0, l = this.providers.length - 1; i < l; i++ ) {
 
@@ -61,7 +65,7 @@ class Configuration {
 
     }
 
-    return this.scope;
+    return this.getDefaultScope ();
 
   }
 
@@ -285,7 +289,11 @@ class Configuration {
 
     if ( Lang.isUndefined ( value ) ) { // Path
 
-      return this.set ( this.getTargetScopeForPath ( scope ), scope, path );
+      const targetScope = this.getTargetScopeForPath ( scope );
+
+      if ( !targetScope ) throw new Error ( 'You cannot set without any providers' );
+
+      return this.set ( targetScope, scope, path );
 
     }
 
@@ -332,7 +340,11 @@ class Configuration {
 
     if ( Lang.isUndefined ( data ) ) { // Data
 
-      return this.update ( this.scope, scope );
+      const targetScope = this.getDefaultScope ();
+
+      if ( !targetScope ) throw new Error ( 'You cannot update without any providers' );
+
+      return this.update ( targetScope, scope );
 
     }
 

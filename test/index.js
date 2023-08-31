@@ -25,7 +25,6 @@ describe ( 'Configuration', () => {
 
       const conf = new Configuration ( Fixtures.options () );
 
-      t.is ( conf.scope, 'global' );
       t.is ( conf.scopes.local, conf.providers[0] );
       t.is ( conf.scopes.global, conf.providers[1] );
       t.is ( conf.handlers.length, 0 );
