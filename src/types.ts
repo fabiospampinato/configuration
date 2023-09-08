@@ -34,7 +34,8 @@ type ValuePrimitive = null | undefined | boolean | number | string;
 type ValueArray = Array<Value>;
 type ValueObject = { [key: string]: Value };
 
-type Filter = ( value: Data ) => Data | undefined;
+type Filter = ( value: Data ) => Data;
+type FilterRaw = ( value: Data ) => Data | undefined;
 
 type ChangeHandler = (( value: Value | undefined, valuePrev: Value | undefined ) => void) | (() => void);
 type ChangeHandlerData = {
@@ -49,7 +50,7 @@ type Disposer = () => void;
 type Options = {
   providers: Provider[],
   defaults: Data,
-  filter?: Filter
+  filter?: FilterRaw
 };
 
 /* PROVIDERS TYPES */
