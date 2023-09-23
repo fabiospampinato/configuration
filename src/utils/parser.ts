@@ -1,8 +1,9 @@
 
 /* IMPORT */
 
+import stringify from 'json-oneline-stringify';
 import JSONC from 'tiny-jsonc';
-import type {Data, DataRaw, Value} from '../types';
+import type {Data, DataRaw} from '../types';
 import Lang from './lang';
 
 /* MAIN */
@@ -41,25 +42,11 @@ class Parser {
 
   stringify ( data: Data, dataRawPrev?: DataRaw ): DataRaw | undefined {
 
-    const getItem = ( value: Value ): string => {
-
-      let item = JSON.stringify ( value, undefined, ' ' );
-
-      item = item.replace ( /\[\s*?(?:\r?\n|\r)\s*/g, '[' );
-      item = item.replace ( /\s*?(?:\r?\n|\r)\s*]/g, ']' );
-      item = item.replace ( /{\s*?(?:\r?\n|\r)\s*/g, '{ ' );
-      item = item.replace ( /\s*?(?:\r?\n|\r)\s*}/g, ' }' );
-      item = item.replace ( /,\s*?(?:\r?\n|\r)\s*/g, ', ' );
-
-      return item;
-
-    };
-
     const getContent = ( data: Data ): DataRaw => {
 
       if ( Lang.isArray ( data ) ) {
 
-        const lines = data.map ( getItem );
+        const lines = data.map ( stringify );
         const indentation = Lang.isString ( this.indentation ) ? this.indentation : ' '.repeat ( this.indentation );
 
         return `[\n${indentation}${lines.join ( `,\n${indentation}` )}\n]`;

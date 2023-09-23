@@ -99,6 +99,7 @@
   "dependencies": {
     "atomically": "^2.0.2",
     "file-pollex": "^1.1.0",
+    "json-oneline-stringify": "^1.0.0",
     "path-prop": "^2.0.0",
     "plain-object-clone": "^2.0.0",
     "plain-object-is-equal": "^2.0.0",
