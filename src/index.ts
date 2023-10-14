@@ -104,15 +104,15 @@ class Configuration {
 
     for ( const data of this.handlers ) {
 
-      if ( Lang.isNullary ( data.callback ) ) { //TODO: This is not exactly correct, something might have been changed while the flattened configuration could still be the same, but this is much faster
+      const value = data.getter ();
+
+      if ( ( Lang.isUndefined ( data.value ) || !Lang.isPrimitive ( data.value ) ) && !Lang.isPrimitive ( value ) && Lang.isNullary ( data.callback ) ) { //TODO: This is not exactly correct, something might have been changed while the flattened configuration could still be the same, but this is much faster
 
         data.callback ();
 
-      } else {
+        data.value = value;
 
-        const value = data.getter ();
-
-        if ( Lang.isEqual ( data.value, value ) ) continue;
+      } else if ( !Lang.isEqual ( data.value, value ) ) {
 
         const valueNext = Lang.cloneDeep ( value );
 
@@ -393,7 +393,7 @@ class Configuration {
     const callback = args[args.length - 1];
     const getter = () => this.get ( ...getterArgs );
     const valueRaw = getter ();
-    const value = !Lang.isNullary ( callback ) ? Lang.cloneDeep ( valueRaw ) : undefined;
+    const value = Lang.isPrimitive ( valueRaw ) || !Lang.isNullary ( callback ) ? Lang.cloneDeep ( valueRaw ) : undefined;
     const data: ChangeHandlerData = {callback, getter, value};
 
     handlers.push ( data );
