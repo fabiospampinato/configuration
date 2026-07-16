@@ -36,7 +36,7 @@ import ProviderLocalStorage from 'configuration/local-storage'; // A provider th
 import ProviderSessionStorage from 'configuration/session-storage'; // A provider that reads/writes to sessionStorage
 ```
 
-This is how you'd create a multi-tier settings sytem:
+This is how you'd create a multi-tier settings system:
 
 ```ts
 import Configuration from 'configuration';
