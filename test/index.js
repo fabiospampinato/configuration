@@ -54,7 +54,7 @@ describe ( 'Configuration', () => {
 
       t.is ( conf.get ( 'global', 'core.bar' ), 'global' );
 
-      conf.scopes.global.writeSync ( '{' ); // Unparseable data raw, forcing the use of defaults
+      conf.scopes.global.writeSync ( '{' ); // Unparsable data raw, forcing the use of defaults
 
       t.is ( conf.get ( 'global', 'core.bar' ), 'custom' );
       t.is ( conf.scopes.global.dataRaw, '{' );
@@ -333,7 +333,7 @@ describe ( 'Configuration', () => {
 
   describe ( 'scope', it => {
 
-    it ( 'can retrive an internal scope', t => {
+    it ( 'can retrieve an internal scope', t => {
 
       const conf = new Configuration ( Fixtures.options () );
 
