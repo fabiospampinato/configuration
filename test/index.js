@@ -333,7 +333,7 @@ describe ( 'Configuration', () => {
 
   describe ( 'scope', it => {
 
-    it ( 'can retrive an internal scope', t => {
+    it ( 'can retrieve an internal scope', t => {
 
       const conf = new Configuration ( Fixtures.options () );
 
